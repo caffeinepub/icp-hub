@@ -1126,9 +1126,6 @@ const GRADIENT_MAP: Record<string, string> = {
   ICP: "linear-gradient(135deg, #4CC9F0 0%, #A855F7 100%)",
   CryptoSlate: "linear-gradient(135deg, #22C55E 0%, #4CC9F0 100%)",
   Cointelegraph: "linear-gradient(135deg, #F5C542 0%, #7C3AED 100%)",
-  Forum: "linear-gradient(135deg, #3B82F6 0%, #7C3AED 100%)",
-  Decrypt: "linear-gradient(135deg, #EC4899 0%, #7C3AED 100%)",
-  BeInCrypto: "linear-gradient(135deg, #10B981 0%, #4CC9F0 100%)",
 };
 
 const ICP_KEYWORDS = [
@@ -1138,13 +1135,6 @@ const ICP_KEYWORDS = [
   "dfinity",
   "icp",
   "Интернет Компьютер",
-  "canister",
-  "motoko",
-  "chain fusion",
-  "NNS",
-  "SNS",
-  "ckBTC",
-  "ckETH",
 ];
 
 function isIcpRelated(title: string, desc: string): boolean {
@@ -1152,101 +1142,41 @@ function isIcpRelated(title: string, desc: string): boolean {
   return ICP_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()));
 }
 
-function formatDateRu(dateStr: string): string {
-  try {
-    const d = new Date(dateStr);
-    if (Number.isNaN(d.getTime())) return dateStr;
-    return d.toLocaleDateString("ru-RU", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
-  } catch {
-    return dateStr;
-  }
-}
-
-function stripHtml(html: string): string {
-  return html
-    .replace(/<[^>]+>/g, "")
-    .replace(/&[a-z]+;/gi, " ")
-    .trim();
-}
-
-async function fetchWithTimeout(
-  url: string,
-  options: RequestInit = {},
-  timeoutMs = 7000,
-): Promise<Response> {
-  const controller = new AbortController();
-  const id = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const res = await fetch(url, { ...options, signal: controller.signal });
-    return res;
-  } finally {
-    clearTimeout(id);
-  }
-}
-
-// Fetch via allorigins.win CORS proxy — returns raw content
-async function fetchViaProxy(url: string): Promise<string> {
-  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const res = await fetchWithTimeout(proxy);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
-}
-
-// Parse RSS/Atom XML string into NewsItems
-function parseRssXml(
-  xml: string,
+function parseRss2Json(
+  json: string,
   category: string,
   source: string,
-  filterIcp = true,
 ): NewsItem[] {
   try {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(xml, "text/xml");
-    const items = Array.from(doc.querySelectorAll("item, entry"));
-    const results: NewsItem[] = [];
-    for (const item of items) {
-      const title = stripHtml(
-        item.querySelector("title")?.textContent || "",
-      ).slice(0, 120);
-      const desc = stripHtml(
-        item.querySelector("description, summary, content")?.textContent || "",
-      ).slice(0, 200);
-      if (!title) continue;
-      if (filterIcp && !isIcpRelated(title, desc)) continue;
-      const link =
-        item.querySelector("link")?.getAttribute("href") ||
-        item.querySelector("link")?.textContent ||
-        "#";
-      const pubDate =
-        item.querySelector("pubDate, published, updated")?.textContent || "";
-      results.push({
-        title,
-        excerpt: desc || "Читать статью на сайте источника",
-        date: formatDateRu(pubDate),
+    const data = JSON.parse(json);
+    if (data.status !== "ok" || !Array.isArray(data.items)) return [];
+    return data.items
+      .filter((item: any) =>
+        isIcpRelated(item.title || "", item.description || ""),
+      )
+      .map((item: any) => ({
+        title: (item.title || "").replace(/<[^>]+>/g, "").slice(0, 120),
+        excerpt: (item.description || "").replace(/<[^>]+>/g, "").slice(0, 200),
+        date: item.pubDate
+          ? new Date(item.pubDate).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "",
         source,
-        link: link.trim(),
+        link: item.link || "#",
         gradient: GRADIENT_MAP[category] || GRADIENT_MAP.Media,
         category,
-      });
-    }
-    return results;
+      }));
   } catch {
     return [];
   }
 }
 
-async function fetchRedditDirect(subreddit: string): Promise<NewsItem[]> {
-  const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=20`;
-  const res = await fetchWithTimeout(url, {
-    headers: { Accept: "application/json" },
-  });
-  const text = await res.text();
+function parseReddit(json: string, subreddit: string): NewsItem[] {
   try {
-    const data = JSON.parse(text);
+    const data = JSON.parse(json);
     const children = data?.data?.children;
     if (!Array.isArray(children)) return [];
     return children
@@ -1258,12 +1188,17 @@ async function fetchRedditDirect(subreddit: string): Promise<NewsItem[]> {
         excerpt:
           (c.data?.selftext || "").slice(0, 200) || "Обсуждение на Reddit",
         date: c.data?.created_utc
-          ? formatDateRu(new Date(c.data.created_utc * 1000).toISOString())
+          ? new Date(c.data.created_utc * 1000).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
           : "",
         source: `r/${subreddit}`,
         link:
-          c.data?.url ||
-          (c.data?.permalink ? `https://reddit.com${c.data.permalink}` : "#"),
+          c.data?.url || c.data?.permalink
+            ? `https://reddit.com${c.data.permalink}`
+            : "#",
         gradient: GRADIENT_MAP.Reddit,
         category: "Reddit",
       }));
@@ -1272,75 +1207,40 @@ async function fetchRedditDirect(subreddit: string): Promise<NewsItem[]> {
   }
 }
 
-interface RssSource {
-  url: string;
-  category: string;
-  source: string;
-  filterIcp: boolean;
+async function fetchWithTimeout(
+  url: string,
+  options: RequestInit = {},
+  timeoutMs = 8000,
+): Promise<Response> {
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeoutMs);
+  try {
+    const res = await fetch(url, { ...options, signal: controller.signal });
+    return res;
+  } finally {
+    clearTimeout(id);
+  }
 }
 
-const RSS_SOURCES: RssSource[] = [
-  {
-    url: "https://medium.com/feed/dfinity",
-    category: "DFINITY",
-    source: "DFINITY Blog",
-    filterIcp: false,
-  },
-  {
-    url: "https://icp.news/feed/",
-    category: "ICP",
-    source: "ICP.news",
-    filterIcp: false,
-  },
-  {
-    url: "https://forum.dfinity.org/latest.rss",
-    category: "Forum",
-    source: "DFINITY Forum",
-    filterIcp: false,
-  },
-  {
-    url: "https://www.coindesk.com/arc/outboundfeeds/rss/",
-    category: "Media",
-    source: "CoinDesk",
-    filterIcp: true,
-  },
-  {
-    url: "https://cointelegraph.com/rss",
-    category: "Cointelegraph",
-    source: "Cointelegraph",
-    filterIcp: true,
-  },
-  {
-    url: "https://cryptoslate.com/feed/",
-    category: "CryptoSlate",
-    source: "CryptoSlate",
-    filterIcp: true,
-  },
-  {
-    url: "https://decrypt.co/feed",
-    category: "Decrypt",
-    source: "Decrypt",
-    filterIcp: true,
-  },
-  {
-    url: "https://beincrypto.com/feed/",
-    category: "BeInCrypto",
-    source: "BeInCrypto",
-    filterIcp: true,
-  },
-  {
-    url: "https://coinjournal.net/feed/",
-    category: "Media",
-    source: "CoinJournal",
-    filterIcp: true,
-  },
-  {
-    url: "https://thedefiant.io/feed",
-    category: "Media",
-    source: "The Defiant",
-    filterIcp: true,
-  },
-];
+async function fetchRss2JsonDirect(
+  rssUrl: string,
+  category: string,
+  source: string,
+): Promise<NewsItem[]> {
+  const url = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}&count=10`;
+  const res = await fetchWithTimeout(url);
+  const text = await res.text();
+  return parseRss2Json(text, category, source);
+}
+
+async function fetchRedditDirect(subreddit: string): Promise<NewsItem[]> {
+  const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=15`;
+  const res = await fetchWithTimeout(url, {
+    headers: { Accept: "application/json" },
+  });
+  const text = await res.text();
+  return parseReddit(text, subreddit);
+}
 
 function useIcpNews() {
   const [news, setNews] = useState<NewsItem[]>([]);
@@ -1355,18 +1255,30 @@ function useIcpNews() {
     setLoading(true);
     setError(null);
 
-    const rssPromises = RSS_SOURCES.map((src) =>
-      fetchViaProxy(src.url)
-        .then((xml) =>
-          parseRssXml(xml, src.category, src.source, src.filterIcp),
-        )
-        .catch(() => [] as NewsItem[]),
-    );
-
     const fetchers = [
-      fetchRedditDirect("dfinity").catch(() => [] as NewsItem[]),
-      fetchRedditDirect("InternetComputer").catch(() => [] as NewsItem[]),
-      ...rssPromises,
+      fetchRedditDirect("dfinity"),
+      fetchRedditDirect("InternetComputer"),
+      fetchRss2JsonDirect(
+        "https://medium.com/feed/dfinity",
+        "DFINITY",
+        "DFINITY Blog",
+      ),
+      fetchRss2JsonDirect("https://icp.news/feed/", "ICP", "ICP.news"),
+      fetchRss2JsonDirect(
+        "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "Media",
+        "CoinDesk",
+      ),
+      fetchRss2JsonDirect(
+        "https://cointelegraph.com/rss",
+        "Cointelegraph",
+        "Cointelegraph",
+      ),
+      fetchRss2JsonDirect(
+        "https://cryptoslate.com/feed/",
+        "CryptoSlate",
+        "CryptoSlate",
+      ),
     ];
 
     Promise.allSettled(fetchers).then((results) => {
@@ -1377,7 +1289,7 @@ function useIcpNews() {
       }
       const seen = new Set<string>();
       const deduped = all.filter((item) => {
-        if (!item.title || seen.has(item.link)) return false;
+        if (seen.has(item.link)) return false;
         seen.add(item.link);
         return true;
       });
@@ -1390,7 +1302,7 @@ function useIcpNews() {
           "Не удалось загрузить актуальные новости, показываем кешированные",
         );
       } else {
-        setNews(deduped.slice(0, 30));
+        setNews(deduped.slice(0, 12));
       }
       setLastUpdated(new Date());
       setLoading(false);
@@ -1402,66 +1314,101 @@ function useIcpNews() {
   }, [tick]);
 
   const refresh = useCallback(() => setTick((t) => t + 1), []);
+
   return { news, loading, error, lastUpdated, refresh };
 }
+
+const NEWS_CATEGORIES = [
+  "Все",
+  "Reddit",
+  "DFINITY",
+  "Media",
+  "ICP",
+  "CryptoSlate",
+  "Cointelegraph",
+];
 
 function NewsSection() {
   const { news, loading, error, lastUpdated, refresh } = useIcpNews();
   const [activeCategory, setActiveCategory] = useState("Все");
-  const categories = [
-    "Все",
-    "ICP",
-    "DFINITY",
-    "Reddit",
-    "Media",
-    "Cointelegraph",
-    "CryptoSlate",
-    "Forum",
-    "Decrypt",
-    "BeInCrypto",
-  ];
+
   const filtered =
     activeCategory === "Все"
       ? news
       : news.filter((n) => n.category === activeCategory);
 
   return (
-    <section id="news" className="py-20 px-4">
+    <section
+      id="news"
+      className="py-20 px-4 sm:px-6"
+      style={{ background: "rgba(17, 17, 17, 0.4)" }}
+    >
       <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
+        <motion.div
+          initial={{ opacity: 0, y: 24 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="flex flex-wrap items-end justify-between gap-4 mb-8"
+        >
           <div>
-            <h2 className="text-3xl font-bold text-white">Новости ICP</h2>
-            {lastUpdated && (
-              <p className="text-gray-500 text-sm mt-1">
-                Обновлено: {lastUpdated.toLocaleTimeString("ru-RU")} ·{" "}
-                {news.length} статей из {RSS_SOURCES.length + 2} источников
-              </p>
-            )}
+            <div
+              className="flex items-center gap-2 text-sm font-semibold mb-3"
+              style={{ color: "#2BC4B4" }}
+            >
+              <Hash size={16} />
+              <span>ПОСЛЕДНЕЕ</span>
+            </div>
+            <h2
+              className="font-display font-bold text-3xl"
+              style={{ color: "#EAF0FF" }}
+            >
+              Новости ICP
+            </h2>
           </div>
-          <button
-            type="button"
-            onClick={refresh}
-            disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:border-white/30 transition-all text-sm"
-            data-ocid="news.refresh.button"
-            title="Обновить новости"
-          >
-            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
-            Обновить
-          </button>
-        </div>
+          <div className="flex items-center gap-3">
+            {lastUpdated && (
+              <span className="text-xs" style={{ color: "#A9B4C7" }}>
+                Обновлено:{" "}
+                {lastUpdated.toLocaleTimeString("ru-RU", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={refresh}
+              disabled={loading}
+              className="p-2 rounded-lg transition-all hover:opacity-80"
+              style={{ background: "rgba(43,196,180,0.12)", color: "#2BC4B4" }}
+              data-ocid="news.refresh.button"
+              title="Обновить новости"
+            >
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            </button>
+          </div>
+        </motion.div>
 
+        {/* Filter tabs */}
         <div className="flex flex-wrap gap-2 mb-8" data-ocid="news.filter.tab">
-          {categories.map((cat) => (
+          {NEWS_CATEGORIES.map((cat) => (
             <button
               key={cat}
-              type="button"
               onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
-                activeCategory === cat
-                  ? "bg-purple-600 text-white border-purple-500"
-                  : "bg-white/5 text-gray-400 border-white/10 hover:border-white/20 hover:text-white"
-              }`}
+              type="button"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                background:
+                  activeCategory === cat
+                    ? "rgba(43,196,180,0.2)"
+                    : "rgba(255,255,255,0.05)",
+                color: activeCategory === cat ? "#2BC4B4" : "#A9B4C7",
+                border:
+                  activeCategory === cat
+                    ? "1px solid rgba(43,196,180,0.4)"
+                    : "1px solid transparent",
+              }}
             >
               {cat}
             </button>
@@ -1470,7 +1417,12 @@ function NewsSection() {
 
         {error && (
           <div
-            className="mb-4 px-4 py-3 rounded-lg bg-yellow-900/20 border border-yellow-500/20 text-yellow-400 text-sm"
+            className="mb-6 px-4 py-3 rounded-lg text-xs"
+            style={{
+              background: "rgba(255,100,50,0.08)",
+              color: "#FF9066",
+              border: "1px solid rgba(255,100,50,0.2)",
+            }}
             data-ocid="news.error_state"
           >
             {error}
@@ -1479,59 +1431,101 @@ function NewsSection() {
 
         {loading ? (
           <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
             data-ocid="news.loading_state"
           >
-            {["s1", "s2", "s3", "s4", "s5", "s6"].map((id) => (
+            {Array.from({ length: 6 }, (_, i) => i).map((i) => (
               <div
-                key={id}
-                className="rounded-xl border border-white/5 bg-white/3 h-52 animate-pulse"
-              />
+                key={i}
+                className="rounded-xl overflow-hidden"
+                style={{ background: "#111111", border: "1px solid #1f1f1f" }}
+              >
+                <div
+                  className="h-36 w-full animate-pulse"
+                  style={{ background: "#1f1f1f" }}
+                />
+                <div className="p-5 space-y-3">
+                  <div
+                    className="h-3 w-1/3 rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                  <div
+                    className="h-4 w-full rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                  <div
+                    className="h-4 w-4/5 rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                  <div
+                    className="h-3 w-2/3 rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                </div>
+              </div>
             ))}
           </div>
         ) : filtered.length === 0 ? (
           <div
-            className="text-center py-16 text-gray-500"
+            className="text-center py-16"
+            style={{ color: "#A9B4C7" }}
             data-ocid="news.empty_state"
           >
             Нет новостей по этой категории
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((item, i) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((article, i) => (
               <motion.div
-                key={item.link || String(i)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.05, 0.3) }}
-                className="rounded-xl border border-white/5 bg-white/3 overflow-hidden hover:border-white/15 transition-all group"
+                key={`${article.link}-${article.title.slice(0, 20)}`}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+                className="card-glow rounded-xl flex flex-col overflow-hidden transition-all duration-300"
+                style={{ background: "#111111", border: "1px solid #1f1f1f" }}
                 data-ocid={`news.item.${i + 1}`}
               >
                 <div
-                  className="h-1.5 w-full"
-                  style={{ background: item.gradient }}
+                  className="h-36 w-full"
+                  style={{ background: article.gradient }}
                 />
-                <div className="p-5 flex flex-col gap-3 h-full">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-gray-300">
-                      {item.source}
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                      className="text-xs font-semibold px-2 py-0.5 rounded"
+                      style={{
+                        background: "rgba(43,196,180,0.15)",
+                        color: "#2BC4B4",
+                      }}
+                    >
+                      {article.source}
                     </span>
-                    <span className="text-xs text-gray-500">{item.date}</span>
+                    <span className="text-xs" style={{ color: "#A9B4C7" }}>
+                      {article.date}
+                    </span>
                   </div>
-                  <h3 className="text-sm font-semibold text-white leading-snug group-hover:text-purple-300 transition-colors line-clamp-3">
-                    {item.title}
+                  <h3
+                    className="font-display font-bold text-sm leading-snug mb-2"
+                    style={{ color: "#EAF0FF" }}
+                  >
+                    {article.title}
                   </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed line-clamp-3 flex-1">
-                    {item.excerpt}
+                  <p
+                    className="text-xs leading-relaxed mb-4 flex-1"
+                    style={{ color: "#A9B4C7" }}
+                  >
+                    {article.excerpt}
                   </p>
                   <a
-                    href={item.link}
+                    href={article.link}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-xs text-purple-400 hover:text-purple-300 transition-colors mt-auto"
+                    className="inline-flex items-center gap-1 text-xs font-semibold transition-all hover:gap-2"
+                    style={{ color: "#2BC4B4" }}
                     data-ocid={`news.read_more.link.${i + 1}`}
                   >
-                    Читать →
+                    Читать далее <ChevronRight size={13} />
                   </a>
                 </div>
               </motion.div>
