@@ -62,4 +62,11 @@ export interface backendInterface {
     rejectFriendRequest(from: Principal): Promise<void>;
     removeFriend(friend: Principal): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
+    fetchRedditDfinity(): Promise<string>;
+    fetchRedditICP(): Promise<string>;
+    fetchDfinityBlog(): Promise<string>;
+    fetchIcpNews(): Promise<string>;
+    fetchCoinDesk(): Promise<string>;
+    fetchCryptoSlate(): Promise<string>;
+    fetchCointelegraph(): Promise<string>;
 }

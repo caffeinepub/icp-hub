@@ -1,27 +1,29 @@
 # ICP Hub
 
 ## Current State
-The app has Internet Identity auth, chat with display names, ICP price charts from multiple exchanges. Backend has: setDisplayName, getMyProfile, getUserProfile (by Principal), sendChatMessage, getChatMessages, HTTP outcalls for price data.
+Новости полностью статичные — массив NEWS захардкожен в App.tsx с 6 фиктивными статьями.
+Бэкенд имеет HTTP outcalls и уже умеет делать запросы (getCurrentIcpPrice, getIcpPriceHistory).
 
 ## Requested Changes (Diff)
 
 ### Add
-- Extended user profile: displayName, bio, avatarUrl (optional)
-- Friends system: sendFriendRequest, acceptFriendRequest, removeFriend, getFriends, getPendingFriendRequests
-- Get all users list (for friend discovery)
-- Profile page (own) with inline editing of nickname and bio
-- Modal to view any user's public profile from chat (click on username)
-- Friends tab/section showing accepted friends and pending requests
-- In chat: clicking username opens profile modal with "Add Friend" / "Remove Friend" button
+- Бэкенд-метод `fetchIcpNews` — делает HTTP outcalls к нескольким бесплатным RSS/API источникам и возвращает массив новостей [{title, excerpt, date, source, link}]
+- Источники: Reddit r/dfinity (RSS), Reddit r/InternetComputer (RSS), DFINITY Blog (Medium RSS), CoinDesk (RSS с фильтром ICP), CryptoSlate (RSS), ICP.news (RSS)
+- Кэширование новостей в памяти на 10 минут (Timer)
+- Frontend хук `useIcpNews` — запрашивает `fetchIcpNews` с бэкенда при загрузке
+- Кнопка «Обновить» в секции новостей
+- Фильтр по источнику (All / Reddit / DFINITY / Media)
+- Счётчик и дата последнего обновления
 
 ### Modify
-- UserProfile type: add bio field
-- setDisplayName → setProfile (accepts displayName + bio)
+- NewsSection — вместо статичного массива NEWS использует данные с бэкенда
+- Показывает skeleton-загрузку пока идёт запрос
+- При ошибке — fallback на статичные новости
 
 ### Remove
-- Nothing removed
+- Статичный массив NEWS из App.tsx (заменяется динамическими данными)
 
 ## Implementation Plan
-1. Update main.mo: extend UserProfile with bio, add FriendRequest/FriendStatus types, add sendFriendRequest, acceptFriendRequest, removeFriend, getFriends, getPendingRequests, getAllUsers
-2. Regenerate Motoko bindings
-3. Frontend: add Profile page/modal with edit form, UserProfileModal component triggered from chat username clicks, Friends panel with pending/accepted lists
+1. Добавить `fetchIcpNews` в main.mo: делает outcalls к 4+ RSS источникам, парсит XML/JSON текстом, возвращает `[{title; excerpt; date; source; link; gradient}]`
+2. Обновить backend.d.ts с новым типом NewsItem и методом
+3. Обновить NewsSection в App.tsx: хук для загрузки, skeleton, фильтры, кнопка refresh, timestamp

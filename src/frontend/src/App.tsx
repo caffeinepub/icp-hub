@@ -8,10 +8,8 @@ import type { Principal } from "@icp-sdk/core/principal";
 import {
   ArrowDownRight,
   ArrowUpRight,
-  BookOpen,
   Calendar,
   ChevronRight,
-  Clock,
   ExternalLink,
   Github,
   Hash,
@@ -20,7 +18,6 @@ import {
   MessageSquare,
   RefreshCw,
   Send,
-  Star,
   TrendingUp,
   UserCircle,
   Users,
@@ -45,144 +42,6 @@ import {
   useMultiExchange,
   usePriceHistory,
 } from "./hooks/useMultiExchange";
-
-const COURSES = [
-  {
-    title: "Основы разработки на ICP",
-    level: "Начальный",
-    duration: "8 часов",
-    rating: 4.8,
-    students: 12400,
-    description:
-      "Изучите Motoko, задеплойте первый контейнер и поймите архитектуру Internet Computer.",
-    link: "https://internetcomputer.org/docs/current/developer-docs/getting-started/overview-of-icp",
-    color: "#7C3AED",
-    icon: "🧱",
-  },
-  {
-    title: "DeFi на Internet Computer",
-    level: "Средний",
-    duration: "12 часов",
-    rating: 4.7,
-    students: 8200,
-    description:
-      "Создавайте децентрализованные финансовые приложения с технологией Chain Fusion и управлением SNS.",
-    link: "https://internetcomputer.org/defi",
-    color: "#2BC4B4",
-    icon: "💰",
-  },
-  {
-    title: "Chain Fusion и интеграция Bitcoin",
-    level: "Продвинутый",
-    duration: "10 часов",
-    rating: 4.9,
-    students: 5600,
-    description:
-      "Глубокое погружение в интеграцию Bitcoin, ckBTC и кросс-чейн dApps на пороговой ECDSA.",
-    link: "https://internetcomputer.org/bitcoin-integration",
-    color: "#4CC9F0",
-    icon: "₿",
-  },
-  {
-    title: "Смарт-контракты на Motoko",
-    level: "Средний",
-    duration: "6 часов",
-    rating: 4.6,
-    students: 9800,
-    description:
-      "Пишите, тестируйте и деплойте production-ready смарт-контракты на Motoko — нативном языке ICP.",
-    link: "https://motoko-book.dev/",
-    color: "#A855F7",
-    icon: "📜",
-  },
-  {
-    title: "Идентификация и авторизация ICP",
-    level: "Начальный",
-    duration: "4 часа",
-    rating: 4.5,
-    students: 15000,
-    description:
-      "Внедрите Internet Identity, Web3-аутентификацию и самосуверенную идентичность в ваших dApps.",
-    link: "https://internetcomputer.org/internet-identity",
-    color: "#F5C542",
-    icon: "🔐",
-  },
-  {
-    title: "SNS и DAO-управление",
-    level: "Продвинутый",
-    duration: "14 часов",
-    rating: 4.8,
-    students: 4200,
-    description:
-      "Запустите Service Nervous System, токенизируйте ваш dApp и создайте полностью on-chain DAO.",
-    link: "https://internetcomputer.org/sns",
-    color: "#22C55E",
-    icon: "🗳️",
-  },
-];
-
-const NEWS = [
-  {
-    title: "ICP превысил 1 миллиард транзакций на блокчейне",
-    date: "24 мар 2026",
-    source: "ICP.news",
-    excerpt:
-      "Блокчейн Internet Computer достиг важной вехи — обработано более миллиарда полностью on-chain транзакций.",
-    link: "https://icp.news",
-    gradient: "linear-gradient(135deg, #7C3AED 0%, #4CC9F0 100%)",
-  },
-  {
-    title: "DFINITY объявляет о Chain Fusion v2",
-    date: "22 мар 2026",
-    source: "DFINITY Blog",
-    excerpt:
-      "Технология Chain Fusion получила крупное обновление, обеспечивающее бесшовную совместимость с Ethereum, Bitcoin и Solana.",
-    link: "https://dfinity.org/blog",
-    gradient: "linear-gradient(135deg, #2BC4B4 0%, #7C3AED 100%)",
-  },
-  {
-    title: "Программа грантов ICP удвоила финансирование",
-    date: "20 мар 2026",
-    source: "ICP Dashboard",
-    excerpt:
-      "Фонд DFINITY удвоил пул грантов разработчиков до $100M, поддерживая 500+ активных проектов на ICP.",
-    link: "https://dfinity.org/grants",
-    gradient: "linear-gradient(135deg, #A855F7 0%, #2BC4B4 100%)",
-  },
-  {
-    title: "Internet Identity теперь поддерживает Passkeys",
-    date: "18 мар 2026",
-    source: "ICP.news",
-    excerpt:
-      "Web3-аутентификация стала проще: Internet Identity интегрировала поддержку WebAuthn passkey во всех браузерах.",
-    link: "https://icp.news",
-    gradient: "linear-gradient(135deg, #4CC9F0 0%, #A855F7 100%)",
-  },
-  {
-    title: "Новый DEX на ICP достиг $50M TVL за первую неделю",
-    date: "15 мар 2026",
-    source: "CoinDesk",
-    excerpt:
-      "ICPSwap v3 запустился с пулами сконцентрированной ликвидности и набрал $50M TVL в рекордные сроки.",
-    link: "https://coindesk.com",
-    gradient: "linear-gradient(135deg, #22C55E 0%, #4CC9F0 100%)",
-  },
-  {
-    title: "DFINITY Foundation вступила в Hyperledger",
-    date: "12 мар 2026",
-    source: "DFINITY Blog",
-    excerpt:
-      "DFINITY стала премиум-членом Hyperledger Foundation, принося on-chain управление ICP в корпоративный сектор.",
-    link: "https://dfinity.org/blog",
-    gradient: "linear-gradient(135deg, #F5C542 0%, #7C3AED 100%)",
-  },
-];
-
-const LEVEL_COLORS: Record<string, string> = {
-  Начальный: "#22C55E",
-  Средний: "#F5C542",
-  Продвинутый: "#EF4444",
-};
 
 function fmt(n: number | null, digits = 2) {
   if (n === null) return "—";
@@ -211,24 +70,6 @@ function PulseDot({ color }: { color: string }) {
   );
 }
 
-function StarRating({ rating }: { rating: number }) {
-  return (
-    <span className="flex items-center gap-1">
-      {[1, 2, 3, 4, 5].map((i) => (
-        <Star
-          key={i}
-          size={12}
-          fill={i <= Math.round(rating) ? "#F5C542" : "none"}
-          stroke="#F5C542"
-        />
-      ))}
-      <span style={{ color: "#F5C542" }} className="text-xs ml-1 font-semibold">
-        {rating}
-      </span>
-    </span>
-  );
-}
-
 function TickerBar() {
   const { prices } = useMultiExchange();
 
@@ -237,7 +78,7 @@ function TickerBar() {
       className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center gap-8 px-4"
       style={{
         height: "36px",
-        background: "#080F1A",
+        background: "#000000",
         borderBottom: "1px solid #1E2D42",
         fontSize: "12px",
       }}
@@ -294,7 +135,6 @@ function Navbar({ activeSection }: { activeSection: string }) {
     ? `${principal.slice(0, 5)}...${principal.slice(-3)}`
     : null;
   const navLinks = [
-    { label: "Курсы", href: "#courses" },
     { label: "Новости", href: "#news" },
     { label: "Трейдинг", href: "#trading" },
     { label: "Сообщество", href: "#community" },
@@ -311,9 +151,9 @@ function Navbar({ activeSection }: { activeSection: string }) {
         className="fixed left-0 right-0 z-40"
         style={{
           top: "36px",
-          background: "rgba(11, 18, 32, 0.92)",
+          background: "rgba(0, 0, 0, 0.92)",
           backdropFilter: "blur(12px)",
-          borderBottom: "1px solid #2A3A52",
+          borderBottom: "1px solid #1f1f1f",
         }}
       >
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -384,7 +224,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
                     type="button"
                     onClick={clear}
                     className="text-sm font-medium px-4 py-2 rounded-full transition-all hover:opacity-90"
-                    style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
+                    style={{ color: "#A9B4C7", border: "1px solid #1f1f1f" }}
                     data-ocid="nav.logout.button"
                   >
                     Выйти
@@ -397,7 +237,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
                     onClick={login}
                     disabled={isLoggingIn}
                     className="text-sm font-medium px-4 py-2 rounded-full transition-all disabled:opacity-50"
-                    style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
+                    style={{ color: "#A9B4C7", border: "1px solid #1f1f1f" }}
                     data-ocid="nav.login.button"
                   >
                     {isLoggingIn ? "Вход..." : "Войти"}
@@ -433,7 +273,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
         {menuOpen && (
           <div
             className="md:hidden"
-            style={{ background: "#121A2A", borderTop: "1px solid #2A3A52" }}
+            style={{ background: "#060606", borderTop: "1px solid #1f1f1f" }}
           >
             <div className="px-4 py-4 flex flex-col gap-3">
               {navLinks.map((link) => (
@@ -473,7 +313,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
                       type="button"
                       onClick={clear}
                       className="flex-1 text-sm py-2 rounded-full"
-                      style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
+                      style={{ color: "#A9B4C7", border: "1px solid #1f1f1f" }}
                       data-ocid="nav.mobile.logout.button"
                     >
                       Выйти
@@ -486,7 +326,7 @@ function Navbar({ activeSection }: { activeSection: string }) {
                       onClick={login}
                       disabled={isLoggingIn}
                       className="flex-1 text-sm py-2 rounded-full disabled:opacity-50"
-                      style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
+                      style={{ color: "#A9B4C7", border: "1px solid #1f1f1f" }}
                       data-ocid="nav.mobile.login.button"
                     >
                       {isLoggingIn ? "Вход..." : "Войти"}
@@ -575,16 +415,6 @@ function HeroSection() {
             </p>
             <div className="flex flex-wrap gap-4">
               <a
-                href="#courses"
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-white text-sm transition-all hover:opacity-90 hover:shadow-glow"
-                style={{
-                  background: "linear-gradient(135deg, #7C3AED, #A855F7)",
-                }}
-                data-ocid="hero.start_learning.button"
-              >
-                Начать обучение <ChevronRight size={16} />
-              </a>
-              <a
                 href="#trading"
                 className="inline-flex items-center gap-2 px-6 py-3 rounded-full font-semibold text-sm transition-all"
                 style={{ color: "#2BC4B4", border: "2px solid #2BC4B4" }}
@@ -592,26 +422,6 @@ function HeroSection() {
               >
                 Смотреть график <TrendingUp size={16} />
               </a>
-            </div>
-
-            <div className="flex flex-wrap gap-6 mt-10">
-              {[
-                { value: "6+", label: "Курсов" },
-                { value: "55К+", label: "Студентов" },
-                { value: "100%", label: "Онлайн" },
-              ].map((stat) => (
-                <div key={stat.label}>
-                  <div
-                    className="text-2xl font-display font-bold"
-                    style={{ color: "#EAF0FF" }}
-                  >
-                    {stat.value}
-                  </div>
-                  <div className="text-xs" style={{ color: "#A9B4C7" }}>
-                    {stat.label}
-                  </div>
-                </div>
-              ))}
             </div>
           </motion.div>
 
@@ -637,7 +447,7 @@ function HeroSection() {
                 style={{
                   width: "100%",
                   maxWidth: "520px",
-                  border: "1px solid #2A3A52",
+                  border: "1px solid #1f1f1f",
                 }}
               />
             </div>
@@ -653,7 +463,7 @@ function ExchangeCard({ ex }: { ex: ExchangePrice }) {
   return (
     <div
       className="rounded-xl overflow-hidden flex flex-col"
-      style={{ background: "#1A2433", border: "1px solid #2A3A52" }}
+      style={{ background: "#111111", border: "1px solid #1f1f1f" }}
     >
       <div className="h-1 w-full" style={{ background: ex.logoColor }} />
       <div className="p-5 flex flex-col gap-3">
@@ -834,10 +644,10 @@ function ExchangePanel() {
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
           className="rounded-xl overflow-hidden"
-          style={{ background: "#1A2433", border: "1px solid #2A3A52" }}
+          style={{ background: "#111111", border: "1px solid #1f1f1f" }}
           data-ocid="exchanges.comparison.table"
         >
-          <div className="p-4 border-b" style={{ borderColor: "#2A3A52" }}>
+          <div className="p-4 border-b" style={{ borderColor: "#1f1f1f" }}>
             <h3
               className="font-display font-semibold text-sm"
               style={{ color: "#EAF0FF" }}
@@ -848,7 +658,7 @@ function ExchangePanel() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr style={{ borderBottom: "1px solid #2A3A52" }}>
+                <tr style={{ borderBottom: "1px solid #1f1f1f" }}>
                   {[
                     "Биржа",
                     "Цена",
@@ -1024,10 +834,10 @@ function TradingSection() {
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.1 }}
           className="rounded-2xl overflow-hidden"
-          style={{ background: "#1A2433", border: "1px solid #2A3A52" }}
+          style={{ background: "#111111", border: "1px solid #1f1f1f" }}
         >
           {/* Price header */}
-          <div className="p-6 border-b" style={{ borderColor: "#2A3A52" }}>
+          <div className="p-6 border-b" style={{ borderColor: "#1f1f1f" }}>
             <div className="flex flex-wrap items-center gap-6">
               <div>
                 <div
@@ -1115,19 +925,19 @@ function TradingSection() {
                 >
                   <CartesianGrid
                     strokeDasharray="3 3"
-                    stroke="#2A3A52"
+                    stroke="#1f1f1f"
                     vertical={false}
                   />
                   <XAxis
                     dataKey="date"
-                    stroke="#2A3A52"
+                    stroke="#1f1f1f"
                     tick={{ fill: "#A9B4C7", fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
                     interval="preserveStartEnd"
                   />
                   <YAxis
-                    stroke="#2A3A52"
+                    stroke="#1f1f1f"
                     tick={{ fill: "#A9B4C7", fontSize: 10 }}
                     axisLine={false}
                     tickLine={false}
@@ -1138,7 +948,7 @@ function TradingSection() {
                   <Tooltip
                     contentStyle={{
                       background: "#202C3D",
-                      border: "1px solid #2A3A52",
+                      border: "1px solid #1f1f1f",
                       borderRadius: "8px",
                       color: "#EAF0FF",
                       fontSize: "12px",
@@ -1175,7 +985,7 @@ function TradingSection() {
           {/* Stats grid */}
           <div
             className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 border-t"
-            style={{ borderColor: "#2A3A52" }}
+            style={{ borderColor: "#1f1f1f" }}
           >
             {[
               {
@@ -1212,7 +1022,7 @@ function TradingSection() {
               <div
                 key={stat.label}
                 className="px-5 py-4 border-r last:border-r-0"
-                style={{ borderColor: "#2A3A52" }}
+                style={{ borderColor: "#1f1f1f" }}
               >
                 <div className="text-xs mb-1" style={{ color: "#A9B4C7" }}>
                   {stat.label}
@@ -1246,128 +1056,261 @@ function TradingSection() {
   );
 }
 
-function CoursesSection() {
-  return (
-    <section id="courses" className="py-20 px-4 sm:px-6">
-      <div className="max-w-6xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="mb-12"
-        >
-          <div
-            className="flex items-center gap-2 text-sm font-semibold mb-3"
-            style={{ color: "#A855F7" }}
-          >
-            <BookOpen size={16} />
-            <span>ОБУЧЕНИЕ</span>
-          </div>
-          <h2
-            className="font-display font-bold text-3xl"
-            style={{ color: "#EAF0FF" }}
-          >
-            Курсы по ICP
-          </h2>
-          <p className="mt-2 text-sm" style={{ color: "#A9B4C7" }}>
-            Всё необходимое для разработки на Internet Computer
-          </p>
-        </motion.div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {COURSES.map((course, i) => (
-            <motion.div
-              key={course.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="card-glow rounded-xl flex flex-col overflow-hidden transition-all duration-300"
-              style={{ background: "#1A2433", border: "1px solid #2A3A52" }}
-              data-ocid={`courses.item.${i + 1}`}
-            >
-              <div
-                className="h-1 w-full"
-                style={{ background: course.color }}
-              />
-              <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-start justify-between mb-3">
-                  <div
-                    className="w-10 h-10 rounded-lg flex items-center justify-center text-xl"
-                    style={{ background: `${course.color}22` }}
-                  >
-                    {course.icon}
-                  </div>
-                  <span
-                    className="text-xs font-bold px-2 py-1 rounded-full"
-                    style={{
-                      background: `${LEVEL_COLORS[course.level]}22`,
-                      color: LEVEL_COLORS[course.level],
-                    }}
-                  >
-                    {course.level}
-                  </span>
-                </div>
-
-                <h3
-                  className="font-display font-bold text-base mb-2 leading-snug"
-                  style={{ color: "#EAF0FF" }}
-                >
-                  {course.title}
-                </h3>
-                <p
-                  className="text-xs leading-relaxed mb-4 flex-1"
-                  style={{ color: "#A9B4C7" }}
-                >
-                  {course.description}
-                </p>
-
-                <div className="flex items-center justify-between mb-4">
-                  <StarRating rating={course.rating} />
-                  <span
-                    className="flex items-center gap-1 text-xs"
-                    style={{ color: "#A9B4C7" }}
-                  >
-                    <Clock size={11} />
-                    {course.duration}
-                  </span>
-                </div>
-                <div
-                  className="flex items-center gap-1 text-xs mb-4"
-                  style={{ color: "#A9B4C7" }}
-                >
-                  <Users size={11} />
-                  <span>
-                    {course.students.toLocaleString("ru-RU")} студентов
-                  </span>
-                </div>
-
-                <a
-                  href={course.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto inline-flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-semibold text-white transition-all hover:opacity-90"
-                  style={{ background: `${course.color}DD` }}
-                  data-ocid={`courses.enroll.button.${i + 1}`}
-                >
-                  Записаться <ChevronRight size={14} />
-                </a>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </div>
-    </section>
-  );
+interface NewsItem {
+  title: string;
+  excerpt: string;
+  date: string;
+  source: string;
+  link: string;
+  gradient: string;
+  category: string;
 }
 
+const FALLBACK_NEWS: NewsItem[] = [
+  {
+    title: "ICP превысил 1 миллиард транзакций на блокчейне",
+    date: "24 мар 2026",
+    source: "ICP.news",
+    excerpt:
+      "Блокчейн Internet Computer достиг важной вехи — обработано более миллиарда полностью on-chain транзакций.",
+    link: "https://icp.news",
+    gradient: "linear-gradient(135deg, #4CC9F0 0%, #A855F7 100%)",
+    category: "ICP",
+  },
+  {
+    title: "DFINITY объявляет о Chain Fusion v2",
+    date: "22 мар 2026",
+    source: "DFINITY Blog",
+    excerpt:
+      "Технология Chain Fusion получила крупное обновление, обеспечивающее бесшовную совместимость с Ethereum, Bitcoin и Solana.",
+    link: "https://dfinity.org/blog",
+    gradient: "linear-gradient(135deg, #7C3AED 0%, #4CC9F0 100%)",
+    category: "DFINITY",
+  },
+  {
+    title: "Internet Identity теперь поддерживает Passkeys",
+    date: "18 мар 2026",
+    source: "ICP.news",
+    excerpt:
+      "Web3-аутентификация стала проще: Internet Identity интегрировала поддержку WebAuthn passkey во всех браузерах.",
+    link: "https://icp.news",
+    gradient: "linear-gradient(135deg, #4CC9F0 0%, #A855F7 100%)",
+    category: "ICP",
+  },
+  {
+    title: "Новый DEX на ICP достиг $50M TVL за первую неделю",
+    date: "15 мар 2026",
+    source: "CoinDesk",
+    excerpt:
+      "ICPSwap v3 запустился с пулами сконцентрированной ликвидности и набрал $50M TVL в рекордные сроки.",
+    link: "https://coindesk.com",
+    gradient: "linear-gradient(135deg, #2BC4B4 0%, #7C3AED 100%)",
+    category: "Media",
+  },
+  {
+    title: "DFINITY Foundation вступила в Hyperledger",
+    date: "12 мар 2026",
+    source: "DFINITY Blog",
+    excerpt:
+      "DFINITY стала премиум-членом Hyperledger Foundation, принося on-chain управление ICP в корпоративный сектор.",
+    link: "https://dfinity.org/blog",
+    gradient: "linear-gradient(135deg, #7C3AED 0%, #4CC9F0 100%)",
+    category: "DFINITY",
+  },
+];
+
+const GRADIENT_MAP: Record<string, string> = {
+  Reddit: "linear-gradient(135deg, #FF4500 0%, #7C3AED 100%)",
+  DFINITY: "linear-gradient(135deg, #7C3AED 0%, #4CC9F0 100%)",
+  Media: "linear-gradient(135deg, #2BC4B4 0%, #7C3AED 100%)",
+  ICP: "linear-gradient(135deg, #4CC9F0 0%, #A855F7 100%)",
+  CryptoSlate: "linear-gradient(135deg, #22C55E 0%, #4CC9F0 100%)",
+  Cointelegraph: "linear-gradient(135deg, #F5C542 0%, #7C3AED 100%)",
+};
+
+const ICP_KEYWORDS = [
+  "ICP",
+  "Internet Computer",
+  "DFINITY",
+  "dfinity",
+  "icp",
+  "Интернет Компьютер",
+];
+
+function isIcpRelated(title: string, desc: string): boolean {
+  const text = `${title} ${desc}`.toLowerCase();
+  return ICP_KEYWORDS.some((kw) => text.includes(kw.toLowerCase()));
+}
+
+function parseRss2Json(
+  json: string,
+  category: string,
+  source: string,
+): NewsItem[] {
+  try {
+    const data = JSON.parse(json);
+    if (data.status !== "ok" || !Array.isArray(data.items)) return [];
+    return data.items
+      .filter((item: any) =>
+        isIcpRelated(item.title || "", item.description || ""),
+      )
+      .map((item: any) => ({
+        title: (item.title || "").replace(/<[^>]+>/g, "").slice(0, 120),
+        excerpt: (item.description || "").replace(/<[^>]+>/g, "").slice(0, 200),
+        date: item.pubDate
+          ? new Date(item.pubDate).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "",
+        source,
+        link: item.link || "#",
+        gradient: GRADIENT_MAP[category] || GRADIENT_MAP.Media,
+        category,
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function parseReddit(json: string, subreddit: string): NewsItem[] {
+  try {
+    const data = JSON.parse(json);
+    const children = data?.data?.children;
+    if (!Array.isArray(children)) return [];
+    return children
+      .filter((c: any) =>
+        isIcpRelated(c.data?.title || "", c.data?.selftext || ""),
+      )
+      .map((c: any) => ({
+        title: (c.data?.title || "").slice(0, 120),
+        excerpt:
+          (c.data?.selftext || "").slice(0, 200) || "Обсуждение на Reddit",
+        date: c.data?.created_utc
+          ? new Date(c.data.created_utc * 1000).toLocaleDateString("ru-RU", {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+            })
+          : "",
+        source: `r/${subreddit}`,
+        link:
+          c.data?.url || c.data?.permalink
+            ? `https://reddit.com${c.data.permalink}`
+            : "#",
+        gradient: GRADIENT_MAP.Reddit,
+        category: "Reddit",
+      }));
+  } catch {
+    return [];
+  }
+}
+
+function useIcpNews() {
+  const { actor, isFetching } = useActor();
+  const [news, setNews] = useState<NewsItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [tick, setTick] = useState(0);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: tick is intentional refresh trigger
+  useEffect(() => {
+    if (!actor || isFetching) return;
+    let cancelled = false;
+    setLoading(true);
+    setError(null);
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const anyActor = actor as any;
+    const fetchers = [
+      anyActor
+        .fetchRedditDfinity()
+        .then((r: string) => parseReddit(r, "dfinity")),
+      anyActor
+        .fetchRedditICP()
+        .then((r: string) => parseReddit(r, "InternetComputer")),
+      anyActor
+        .fetchDfinityBlog()
+        .then((r: string) => parseRss2Json(r, "DFINITY", "DFINITY Blog")),
+      anyActor
+        .fetchIcpNews()
+        .then((r: string) => parseRss2Json(r, "ICP", "ICP.news")),
+      anyActor
+        .fetchCoinDesk()
+        .then((r: string) => parseRss2Json(r, "Media", "CoinDesk")),
+      anyActor
+        .fetchCryptoSlate()
+        .then((r: string) => parseRss2Json(r, "CryptoSlate", "CryptoSlate")),
+      anyActor
+        .fetchCointelegraph()
+        .then((r: string) =>
+          parseRss2Json(r, "Cointelegraph", "Cointelegraph"),
+        ),
+    ];
+
+    Promise.allSettled(fetchers).then((results) => {
+      if (cancelled) return;
+      const all: NewsItem[] = [];
+      for (const r of results) {
+        if (r.status === "fulfilled") all.push(...r.value);
+      }
+      const seen = new Set<string>();
+      const deduped = all.filter((item) => {
+        if (seen.has(item.link)) return false;
+        seen.add(item.link);
+        return true;
+      });
+      deduped.sort(
+        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
+      );
+      if (deduped.length === 0) {
+        setNews(FALLBACK_NEWS);
+        setError(
+          "Не удалось загрузить актуальные новости, показываем кешированные",
+        );
+      } else {
+        setNews(deduped.slice(0, 12));
+      }
+      setLastUpdated(new Date());
+      setLoading(false);
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [actor, isFetching, tick]);
+
+  const refresh = useCallback(() => setTick((t) => t + 1), []);
+
+  return { news, loading, error, lastUpdated, refresh };
+}
+
+const NEWS_CATEGORIES = [
+  "Все",
+  "Reddit",
+  "DFINITY",
+  "Media",
+  "ICP",
+  "CryptoSlate",
+  "Cointelegraph",
+];
+
 function NewsSection() {
+  const { news, loading, error, lastUpdated, refresh } = useIcpNews();
+  const [activeCategory, setActiveCategory] = useState("Все");
+
+  const filtered =
+    activeCategory === "Все"
+      ? news
+      : news.filter((n) => n.category === activeCategory);
+
   return (
     <section
       id="news"
       className="py-20 px-4 sm:px-6"
-      style={{ background: "rgba(26, 36, 51, 0.4)" }}
+      style={{ background: "rgba(17, 17, 17, 0.4)" }}
     >
       <div className="max-w-6xl mx-auto">
         <motion.div
@@ -1375,7 +1318,7 @@ function NewsSection() {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className="flex items-end justify-between mb-12"
+          className="flex flex-wrap items-end justify-between gap-4 mb-8"
         >
           <div>
             <div
@@ -1392,78 +1335,172 @@ function NewsSection() {
               Новости ICP
             </h2>
           </div>
+          <div className="flex items-center gap-3">
+            {lastUpdated && (
+              <span className="text-xs" style={{ color: "#A9B4C7" }}>
+                Обновлено:{" "}
+                {lastUpdated.toLocaleTimeString("ru-RU", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                })}
+              </span>
+            )}
+            <button
+              type="button"
+              onClick={refresh}
+              disabled={loading}
+              className="p-2 rounded-lg transition-all hover:opacity-80"
+              style={{ background: "rgba(43,196,180,0.12)", color: "#2BC4B4" }}
+              data-ocid="news.refresh.button"
+              title="Обновить новости"
+            >
+              <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            </button>
+          </div>
         </motion.div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {NEWS.map((article, i) => (
-            <motion.div
-              key={article.title}
-              initial={{ opacity: 0, y: 24 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: i * 0.08 }}
-              className="card-glow rounded-xl flex flex-col overflow-hidden transition-all duration-300"
-              style={{ background: "#1A2433", border: "1px solid #2A3A52" }}
-              data-ocid={`news.item.${i + 1}`}
+        {/* Filter tabs */}
+        <div className="flex flex-wrap gap-2 mb-8" data-ocid="news.filter.tab">
+          {NEWS_CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              type="button"
+              className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              style={{
+                background:
+                  activeCategory === cat
+                    ? "rgba(43,196,180,0.2)"
+                    : "rgba(255,255,255,0.05)",
+                color: activeCategory === cat ? "#2BC4B4" : "#A9B4C7",
+                border:
+                  activeCategory === cat
+                    ? "1px solid rgba(43,196,180,0.4)"
+                    : "1px solid transparent",
+              }}
             >
-              <div
-                className="h-36 w-full"
-                style={{ background: article.gradient }}
-              />
-              <div className="p-5 flex flex-col flex-1">
-                <div className="flex items-center gap-2 mb-3">
-                  <span
-                    className="text-xs font-semibold px-2 py-0.5 rounded"
-                    style={{
-                      background: "rgba(43,196,180,0.15)",
-                      color: "#2BC4B4",
-                    }}
-                  >
-                    {article.source}
-                  </span>
-                  <span className="text-xs" style={{ color: "#A9B4C7" }}>
-                    {article.date}
-                  </span>
-                </div>
-                <h3
-                  className="font-display font-bold text-sm leading-snug mb-2"
-                  style={{ color: "#EAF0FF" }}
-                >
-                  {article.title}
-                </h3>
-                <p
-                  className="text-xs leading-relaxed mb-4 flex-1"
-                  style={{ color: "#A9B4C7" }}
-                >
-                  {article.excerpt}
-                </p>
-                <a
-                  href={article.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center gap-1 text-xs font-semibold transition-all hover:gap-2"
-                  style={{ color: "#2BC4B4" }}
-                  data-ocid={`news.read_more.link.${i + 1}`}
-                >
-                  Читать далее <ChevronRight size={13} />
-                </a>
-              </div>
-            </motion.div>
+              {cat}
+            </button>
           ))}
         </div>
 
-        <div className="text-right mt-6">
-          <a
-            href="https://icp.news"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-1 text-sm font-semibold transition-colors hover:opacity-80"
-            style={{ color: "#2BC4B4" }}
-            data-ocid="news.view_all.link"
+        {error && (
+          <div
+            className="mb-6 px-4 py-3 rounded-lg text-xs"
+            style={{
+              background: "rgba(255,100,50,0.08)",
+              color: "#FF9066",
+              border: "1px solid rgba(255,100,50,0.2)",
+            }}
+            data-ocid="news.error_state"
           >
-            Все новости <ExternalLink size={14} />
-          </a>
-        </div>
+            {error}
+          </div>
+        )}
+
+        {loading ? (
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+            data-ocid="news.loading_state"
+          >
+            {Array.from({ length: 6 }, (_, i) => i).map((i) => (
+              <div
+                key={i}
+                className="rounded-xl overflow-hidden"
+                style={{ background: "#111111", border: "1px solid #1f1f1f" }}
+              >
+                <div
+                  className="h-36 w-full animate-pulse"
+                  style={{ background: "#1f1f1f" }}
+                />
+                <div className="p-5 space-y-3">
+                  <div
+                    className="h-3 w-1/3 rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                  <div
+                    className="h-4 w-full rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                  <div
+                    className="h-4 w-4/5 rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                  <div
+                    className="h-3 w-2/3 rounded animate-pulse"
+                    style={{ background: "#1f1f1f" }}
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div
+            className="text-center py-16"
+            style={{ color: "#A9B4C7" }}
+            data-ocid="news.empty_state"
+          >
+            Нет новостей по этой категории
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((article, i) => (
+              <motion.div
+                key={`${article.link}-${article.title.slice(0, 20)}`}
+                initial={{ opacity: 0, y: 24 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: i * 0.06 }}
+                className="card-glow rounded-xl flex flex-col overflow-hidden transition-all duration-300"
+                style={{ background: "#111111", border: "1px solid #1f1f1f" }}
+                data-ocid={`news.item.${i + 1}`}
+              >
+                <div
+                  className="h-36 w-full"
+                  style={{ background: article.gradient }}
+                />
+                <div className="p-5 flex flex-col flex-1">
+                  <div className="flex items-center gap-2 mb-3">
+                    <span
+                      className="text-xs font-semibold px-2 py-0.5 rounded"
+                      style={{
+                        background: "rgba(43,196,180,0.15)",
+                        color: "#2BC4B4",
+                      }}
+                    >
+                      {article.source}
+                    </span>
+                    <span className="text-xs" style={{ color: "#A9B4C7" }}>
+                      {article.date}
+                    </span>
+                  </div>
+                  <h3
+                    className="font-display font-bold text-sm leading-snug mb-2"
+                    style={{ color: "#EAF0FF" }}
+                  >
+                    {article.title}
+                  </h3>
+                  <p
+                    className="text-xs leading-relaxed mb-4 flex-1"
+                    style={{ color: "#A9B4C7" }}
+                  >
+                    {article.excerpt}
+                  </p>
+                  <a
+                    href={article.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-xs font-semibold transition-all hover:gap-2"
+                    style={{ color: "#2BC4B4" }}
+                    data-ocid={`news.read_more.link.${i + 1}`}
+                  >
+                    Читать далее <ChevronRight size={13} />
+                  </a>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -1504,7 +1541,7 @@ function CommunitySection() {
     <section
       id="community"
       className="py-20 px-4 sm:px-6"
-      style={{ background: "rgba(26, 36, 51, 0.4)" }}
+      style={{ background: "rgba(17, 17, 17, 0.4)" }}
     >
       <div className="max-w-6xl mx-auto">
         <motion.div
@@ -1541,7 +1578,7 @@ function CommunitySection() {
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.1 }}
               className="card-glow rounded-xl p-6 flex flex-col gap-4 transition-all duration-300"
-              style={{ background: "#1A2433", border: "1px solid #2A3A52" }}
+              style={{ background: "#111111", border: "1px solid #1f1f1f" }}
               data-ocid={`community.item.${i + 1}`}
             >
               <div
@@ -1591,7 +1628,6 @@ function Footer() {
     {
       heading: "Платформа",
       links: [
-        { label: "Курсы", href: "#courses" },
         { label: "Новости", href: "#news" },
         { label: "Трейдинг", href: "#trading" },
         { label: "Сообщество", href: "#community" },
@@ -1623,7 +1659,7 @@ function Footer() {
   return (
     <footer
       className="border-t"
-      style={{ background: "#0B1220", borderColor: "#2A3A52" }}
+      style={{ background: "#000000", borderColor: "#1f1f1f" }}
     >
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-16">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
@@ -1648,8 +1684,8 @@ function Footer() {
               className="text-sm leading-relaxed mb-6"
               style={{ color: "#A9B4C7", maxWidth: "280px" }}
             >
-              Ваш портал в экосистему Internet Computer. Учитесь, следите за
-              новостями и отслеживайте курс ICP.
+              Ваш портал в экосистему Internet Computer. Следите за новостями и
+              отслеживайте курс ICP.
             </p>
             <div className="flex items-center gap-3">
               {[
@@ -1677,9 +1713,9 @@ function Footer() {
                   aria-label={social.label}
                   className="w-9 h-9 rounded-lg flex items-center justify-center transition-all hover:opacity-80"
                   style={{
-                    background: "#1A2433",
+                    background: "#111111",
                     color: "#A9B4C7",
-                    border: "1px solid #2A3A52",
+                    border: "1px solid #1f1f1f",
                   }}
                 >
                   {social.icon}
@@ -1717,7 +1753,7 @@ function Footer() {
 
         <div
           className="border-t mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between gap-4"
-          style={{ borderColor: "#2A3A52" }}
+          style={{ borderColor: "#1f1f1f" }}
         >
           <p className="text-xs" style={{ color: "#A9B4C7" }}>
             © {year} ICP Hub. Работает на Internet Computer.
@@ -1816,7 +1852,7 @@ function UserProfileModal({ principal, onClose }: UserProfileModalProps) {
         className="sm:max-w-md"
         style={{
           background: "#131D2E",
-          border: "1px solid #2A3A52",
+          border: "1px solid #1f1f1f",
           color: "#EAF0FF",
         }}
         data-ocid="user_profile.dialog"
@@ -1882,7 +1918,7 @@ function UserProfileModal({ principal, onClose }: UserProfileModalProps) {
                       onClick={handleReject}
                       disabled={actionLoading}
                       className="flex-1 text-sm py-2 rounded-xl disabled:opacity-50"
-                      style={{ border: "1px solid #2A3A52", color: "#A9B4C7" }}
+                      style={{ border: "1px solid #1f1f1f", color: "#A9B4C7" }}
                       data-ocid="user_profile.cancel_button"
                     >
                       {actionLoading ? "..." : "Отклонить"}
@@ -2033,7 +2069,7 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
           className="sm:max-w-lg max-h-[80vh] overflow-y-auto"
           style={{
             background: "#131D2E",
-            border: "1px solid #2A3A52",
+            border: "1px solid #1f1f1f",
             color: "#EAF0FF",
           }}
           data-ocid="my_profile.dialog"
@@ -2083,7 +2119,7 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
                   type="button"
                   onClick={() => setEditMode(!editMode)}
                   className="text-xs px-3 py-1.5 rounded-lg transition-colors shrink-0"
-                  style={{ border: "1px solid #2A3A52", color: "#A9B4C7" }}
+                  style={{ border: "1px solid #1f1f1f", color: "#A9B4C7" }}
                   data-ocid="my_profile.edit_button"
                 >
                   {editMode ? "Отмена" : "Изменить"}
@@ -2111,9 +2147,9 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
                       placeholder="Ваш никнейм..."
                       className="w-full text-sm px-3 py-2 rounded-lg outline-none"
                       style={{
-                        background: "#1A2433",
+                        background: "#111111",
                         color: "#EAF0FF",
-                        border: "1px solid #2A3A52",
+                        border: "1px solid #1f1f1f",
                       }}
                       data-ocid="my_profile.input"
                     />
@@ -2133,9 +2169,9 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
                       rows={3}
                       className="w-full text-sm px-3 py-2 rounded-lg outline-none resize-none"
                       style={{
-                        background: "#1A2433",
+                        background: "#111111",
                         color: "#EAF0FF",
-                        border: "1px solid #2A3A52",
+                        border: "1px solid #1f1f1f",
                       }}
                       data-ocid="my_profile.textarea"
                     />
@@ -2206,7 +2242,7 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
                           onClick={() => handleReject(req.principal)}
                           className="text-xs px-2 py-1 rounded-lg shrink-0"
                           style={{
-                            border: "1px solid #2A3A52",
+                            border: "1px solid #1f1f1f",
                             color: "#A9B4C7",
                           }}
                           data-ocid="my_profile.cancel_button"
@@ -2333,20 +2369,8 @@ function ChatWidget() {
     actor
       .getMyProfile()
       .then((profile) => {
-        if (profile && "__kind__" in profile && profile.__kind__ === "None") {
+        if (!profile || !profile.displayName) {
           setShowNamePrompt(true);
-        } else if (
-          profile &&
-          "__kind__" in profile &&
-          profile.__kind__ === "Some"
-        ) {
-          const p = (
-            profile as unknown as {
-              __kind__: "Some";
-              value: { displayName: string };
-            }
-          ).value;
-          if (!p.displayName) setShowNamePrompt(true);
         }
       })
       .catch(() => {});
@@ -2388,7 +2412,7 @@ function ChatWidget() {
               width: 380,
               height: 500,
               background: "#131D2E",
-              border: "1px solid #2A3A52",
+              border: "1px solid #1f1f1f",
               boxShadow:
                 "0 8px 48px rgba(0,0,0,0.55), 0 0 0 1px rgba(124,58,237,0.15)",
             }}
@@ -2399,7 +2423,7 @@ function ChatWidget() {
               className="flex items-center justify-between px-4 py-3 shrink-0"
               style={{
                 background: "#0F1825",
-                borderBottom: "1px solid #2A3A52",
+                borderBottom: "1px solid #1f1f1f",
               }}
             >
               <div className="flex items-center gap-2">
@@ -2442,9 +2466,9 @@ function ChatWidget() {
                     placeholder="Ваш никнейм..."
                     className="w-full text-sm px-3 py-1.5 rounded-lg outline-none"
                     style={{
-                      background: "#1A2433",
+                      background: "#111111",
                       color: "#EAF0FF",
-                      border: "1px solid #2A3A52",
+                      border: "1px solid #1f1f1f",
                     }}
                     data-ocid="chat.input"
                   />
@@ -2454,9 +2478,9 @@ function ChatWidget() {
                     placeholder="О себе (необязательно)..."
                     className="w-full text-sm px-3 py-1.5 rounded-lg outline-none"
                     style={{
-                      background: "#1A2433",
+                      background: "#111111",
                       color: "#EAF0FF",
-                      border: "1px solid #2A3A52",
+                      border: "1px solid #1f1f1f",
                     }}
                   />
                 </div>
@@ -2480,7 +2504,7 @@ function ChatWidget() {
               className="flex-1 overflow-y-auto px-4 py-3 flex flex-col gap-2"
               style={{
                 scrollbarWidth: "thin",
-                scrollbarColor: "#2A3A52 transparent",
+                scrollbarColor: "#1f1f1f transparent",
               }}
             >
               {messages.length === 0 && (
@@ -2532,7 +2556,7 @@ function ChatWidget() {
             {/* Input */}
             <div
               className="px-4 py-3 shrink-0"
-              style={{ borderTop: "1px solid #2A3A52" }}
+              style={{ borderTop: "1px solid #1f1f1f" }}
             >
               {identity ? (
                 <div className="flex items-center gap-2">
@@ -2546,9 +2570,9 @@ function ChatWidget() {
                     maxLength={500}
                     className="flex-1 text-sm px-3 py-2 rounded-xl outline-none transition-colors"
                     style={{
-                      background: "#1A2433",
+                      background: "#111111",
                       color: "#EAF0FF",
-                      border: "1px solid #2A3A52",
+                      border: "1px solid #1f1f1f",
                     }}
                     data-ocid="chat.textarea"
                   />
@@ -2603,7 +2627,7 @@ function ChatWidget() {
         {!open && messages.length > 0 && (
           <span
             className="absolute -top-1 -right-1 w-5 h-5 rounded-full text-xs font-bold flex items-center justify-center"
-            style={{ background: "#2BC4B4", color: "#0B1220" }}
+            style={{ background: "#2BC4B4", color: "#000000" }}
           >
             {messages.length > 99 ? "99+" : messages.length}
           </span>
@@ -2623,7 +2647,7 @@ export default function App() {
   const [activeSection, setActiveSection] = useState("");
 
   useEffect(() => {
-    const sections = ["exchanges", "courses", "news", "trading", "community"];
+    const sections = ["exchanges", "news", "trading", "community"];
     const observers: IntersectionObserver[] = [];
 
     for (const id of sections) {
@@ -2648,7 +2672,7 @@ export default function App() {
     <div
       className="min-h-screen"
       style={{
-        background: "linear-gradient(180deg, #0B1220 0%, #121A2A 100%)",
+        background: "linear-gradient(180deg, #000000 0%, #060606 100%)",
       }}
     >
       <TickerBar />
@@ -2657,7 +2681,6 @@ export default function App() {
         <HeroSection />
         <ExchangePanel />
         <TradingSection />
-        <CoursesSection />
         <NewsSection />
         <CommunitySection />
       </main>

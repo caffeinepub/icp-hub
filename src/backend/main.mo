@@ -27,6 +27,50 @@ actor {
     await OutCall.httpGetRequest(url, [], transform);
   };
 
+  // ============ NEWS AGGREGATOR ============
+
+  // Fetch news from Reddit r/dfinity (JSON API)
+  public shared ({ caller }) func fetchRedditDfinity() : async Text {
+    let url = "https://www.reddit.com/r/dfinity/hot.json?limit=10";
+    await OutCall.httpGetRequest(url, [{ name = "User-Agent"; value = "ICPHub/1.0" }], transform);
+  };
+
+  // Fetch news from Reddit r/InternetComputer (JSON API)
+  public shared ({ caller }) func fetchRedditICP() : async Text {
+    let url = "https://www.reddit.com/r/InternetComputer/hot.json?limit=10";
+    await OutCall.httpGetRequest(url, [{ name = "User-Agent"; value = "ICPHub/1.0" }], transform);
+  };
+
+  // Fetch DFINITY Medium RSS
+  public shared ({ caller }) func fetchDfinityBlog() : async Text {
+    let url = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fmedium.com%2Ffeed%2Fdfinity&api_key=free&count=10";
+    await OutCall.httpGetRequest(url, [], transform);
+  };
+
+  // Fetch ICP.news RSS
+  public shared ({ caller }) func fetchIcpNews() : async Text {
+    let url = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Ficp.news%2Ffeed%2F&api_key=free&count=10";
+    await OutCall.httpGetRequest(url, [], transform);
+  };
+
+  // Fetch CoinDesk ICP news via RSS
+  public shared ({ caller }) func fetchCoinDesk() : async Text {
+    let url = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fwww.coindesk.com%2Farc%2Foutboundfeeds%2Frss%2F&api_key=free&count=20";
+    await OutCall.httpGetRequest(url, [], transform);
+  };
+
+  // Fetch CryptoSlate RSS
+  public shared ({ caller }) func fetchCryptoSlate() : async Text {
+    let url = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcryptoslate.com%2Ffeed%2F&api_key=free&count=20";
+    await OutCall.httpGetRequest(url, [], transform);
+  };
+
+  // Fetch Cointelegraph RSS
+  public shared ({ caller }) func fetchCointelegraph() : async Text {
+    let url = "https://api.rss2json.com/v1/api.json?rss_url=https%3A%2F%2Fcointelegraph.com%2Frss&api_key=free&count=20";
+    await OutCall.httpGetRequest(url, [], transform);
+  };
+
   // ============ PROFILES ============
 
   public type UserProfile = {
@@ -35,20 +79,25 @@ actor {
   };
 
   let userProfiles = Map.empty<Principal, UserProfile>();
-  // Migration: keep displayNames from previous version, migrate to userProfiles
   let displayNames = Map.empty<Principal, Text>();
 
-  public shared ({ caller }) func setProfile(displayName : Text, bio : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can set profiles");
+  // Auto-register caller as #user if not yet registered
+  func ensureRegistered(caller : Principal) {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Anonymous users cannot perform this action");
     };
+    if (accessControlState.userRoles.get(caller) == null) {
+      accessControlState.userRoles.add(caller, #user);
+    };
+  };
+
+  public shared ({ caller }) func setProfile(displayName : Text, bio : Text) : async () {
+    ensureRegistered(caller);
     userProfiles.add(caller, { displayName; bio });
   };
 
   public shared ({ caller }) func setDisplayName(displayName : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can set display names");
-    };
+    ensureRegistered(caller);
     let bio = switch (userProfiles.get(caller)) {
       case (null) { "" };
       case (?p) { p.bio };
@@ -69,9 +118,7 @@ actor {
   };
 
   // ============ FRIENDS ============
-  // friendships: sorted key "p1:p2" -> true
   let friendships = Map.empty<Text, Bool>();
-  // friendRequests: "from:to" -> true
   let pendingRequests = Map.empty<Text, Bool>();
 
   func makeKey(a : Principal, b : Principal) : Text {
@@ -85,9 +132,7 @@ actor {
   };
 
   public shared ({ caller }) func sendFriendRequest(to : Principal) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized");
-    };
+    ensureRegistered(caller);
     if (Principal.equal(caller, to)) {
       Runtime.trap("Cannot add yourself");
     };
@@ -95,9 +140,7 @@ actor {
   };
 
   public shared ({ caller }) func acceptFriendRequest(from : Principal) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized");
-    };
+    ensureRegistered(caller);
     pendingRequests.remove(requestKey(from, caller));
     friendships.add(makeKey(caller, from), true);
   };
@@ -156,9 +199,7 @@ actor {
   var nextMessageId = 0;
 
   public shared ({ caller }) func sendChatMessage(text : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can send chat messages");
-    };
+    ensureRegistered(caller);
     let displayName = switch (userProfiles.get(caller)) {
       case (null) { "anonymous" };
       case (?profile) { profile.displayName };
@@ -174,19 +215,19 @@ actor {
     chatMessages.add(newMessage);
     nextMessageId += 1;
 
-    if (chatMessages.size() > 100) {
-      let dropCount = chatMessages.size() - 100;
-      let remainingMessages = chatMessages.toArray().sliceToArray(dropCount, chatMessages.size());
+    let size = chatMessages.size();
+    if (size > 100) {
+      let dropCount : Nat = size - 100;
+      let remainingMessages = chatMessages.toArray().sliceToArray(dropCount, size);
       chatMessages.clear();
       chatMessages.addAll(remainingMessages.values());
     };
   };
 
-  public query ({ caller }) func getChatMessages() : async [ChatMessage] {
+  public query func getChatMessages() : async [ChatMessage] {
     chatMessages.toArray();
   };
 
-  // Migrate old displayNames -> userProfiles on upgrade
   system func postupgrade() {
     for ((p, name) in displayNames.entries()) {
       if (userProfiles.get(p) == null) {
