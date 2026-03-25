@@ -1,0 +1,127 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Plus Jakarta Sans";
+  src: url("/assets/fonts/PlusJakartaSans.woff2") format("woff2");
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    --background: 0.14 0.022 260;
+    --foreground: 0.93 0.02 250;
+    --card: 0.17 0.025 258;
+    --card-foreground: 0.93 0.02 250;
+    --popover: 0.2 0.028 256;
+    --popover-foreground: 0.93 0.02 250;
+    --primary: 0.58 0.22 292;
+    --primary-foreground: 0.98 0.005 250;
+    --secondary: 0.2 0.028 256;
+    --secondary-foreground: 0.93 0.02 250;
+    --muted: 0.22 0.025 255;
+    --muted-foreground: 0.65 0.04 255;
+    --accent: 0.72 0.16 192;
+    --accent-foreground: 0.1 0.02 260;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.985 0 0;
+    --border: 0.28 0.04 256;
+    --input: 0.28 0.04 256;
+    --ring: 0.58 0.22 292;
+    --chart-1: 0.58 0.22 292;
+    --chart-2: 0.72 0.16 192;
+    --chart-3: 0.75 0.18 205;
+    --chart-4: 0.8 0.15 85;
+    --chart-5: 0.65 0.22 315;
+    --sidebar: 0.17 0.025 258;
+    --sidebar-foreground: 0.93 0.02 250;
+    --sidebar-primary: 0.58 0.22 292;
+    --sidebar-primary-foreground: 0.98 0.005 250;
+    --sidebar-accent: 0.2 0.028 256;
+    --sidebar-accent-foreground: 0.93 0.02 250;
+    --sidebar-border: 0.28 0.04 256;
+    --sidebar-ring: 0.58 0.22 292;
+
+    /* Custom ICP palette tokens */
+    --icp-bg: #0b1220;
+    --icp-bg2: #121a2a;
+    --icp-card: #1a2433;
+    --icp-card2: #202c3d;
+    --icp-border: #2a3a52;
+    --icp-text: #eaf0ff;
+    --icp-muted: #a9b4c7;
+    --icp-violet: #7c3aed;
+    --icp-purple: #a855f7;
+    --icp-teal: #2bc4b4;
+    --icp-gold: #f5c542;
+    --icp-cyan: #4cc9f0;
+    --icp-neon: #9b5de5;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    color-scheme: dark;
+  }
+
+  body {
+    background: linear-gradient(180deg, #0b1220 0%, #121a2a 100%);
+    color: #eaf0ff;
+    font-family: "Plus Jakarta Sans", sans-serif;
+    min-height: 100vh;
+  }
+}
+
+.font-display {
+  font-family: "Bricolage Grotesque", sans-serif;
+}
+
+.gradient-violet {
+  background: linear-gradient(135deg, #7c3aed, #a855f7);
+}
+
+.gradient-teal {
+  background: linear-gradient(135deg, #2bc4b4, #4cc9f0);
+}
+
+.card-glow:hover {
+  box-shadow: 0 0 24px 0 rgba(124, 58, 237, 0.25);
+  border-color: #7c3aed;
+}
+
+.nav-link {
+  color: #a9b4c7;
+  transition: color 0.2s;
+}
+
+.nav-link:hover,
+.nav-link.active {
+  color: #eaf0ff;
+}
+
+.chart-container {
+  background: #1a2433;
+  border: 1px solid #2a3a52;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
