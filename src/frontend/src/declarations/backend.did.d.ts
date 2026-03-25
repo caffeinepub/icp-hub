@@ -26,7 +26,7 @@ export interface TransformationOutput {
   'body' : Uint8Array,
   'headers' : Array<http_header>,
 }
-export interface UserProfile { 'displayName' : string }
+export interface UserProfile { 'displayName' : string, 'bio' : string }
 export type UserRole = { 'admin' : null } |
   { 'user' : null } |
   { 'guest' : null };
@@ -38,16 +38,25 @@ export interface http_request_result {
 }
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'acceptFriendRequest' : ActorMethod<[Principal], undefined>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
+  'getAllUsers' : ActorMethod<[], Array<[Principal, UserProfile]>>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getChatMessages' : ActorMethod<[], Array<ChatMessage>>,
   'getCurrentIcpPrice' : ActorMethod<[], string>,
+  'getFriendStatus' : ActorMethod<[Principal], string>,
+  'getFriends' : ActorMethod<[], Array<Principal>>,
   'getIcpPriceHistory' : ActorMethod<[], string>,
   'getMyProfile' : ActorMethod<[], [] | [UserProfile]>,
+  'getPendingFriendRequests' : ActorMethod<[], Array<Principal>>,
   'getUserProfile' : ActorMethod<[Principal], [] | [UserProfile]>,
   'isCallerAdmin' : ActorMethod<[], boolean>,
+  'rejectFriendRequest' : ActorMethod<[Principal], undefined>,
+  'removeFriend' : ActorMethod<[Principal], undefined>,
   'sendChatMessage' : ActorMethod<[string], undefined>,
+  'sendFriendRequest' : ActorMethod<[Principal], undefined>,
   'setDisplayName' : ActorMethod<[string], undefined>,
+  'setProfile' : ActorMethod<[string, string], undefined>,
   'transform' : ActorMethod<[TransformationInput], TransformationOutput>,
 }
 export declare const idlService: IDL.ServiceClass;

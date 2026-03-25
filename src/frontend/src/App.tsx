@@ -1,4 +1,11 @@
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import type { Principal } from "@icp-sdk/core/principal";
+import {
   ArrowDownRight,
   ArrowUpRight,
   BookOpen,
@@ -15,6 +22,7 @@ import {
   Send,
   Star,
   TrendingUp,
+  UserCircle,
   Users,
   X,
 } from "lucide-react";
@@ -279,6 +287,7 @@ function TickerBar() {
 
 function Navbar({ activeSection }: { activeSection: string }) {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
   const { identity, login, clear, isLoggingIn } = useInternetIdentity();
   const principal = identity?.getPrincipal().toString();
   const shortPrincipal = principal
@@ -297,163 +306,86 @@ function Navbar({ activeSection }: { activeSection: string }) {
   ];
 
   return (
-    <nav
-      className="fixed left-0 right-0 z-40"
-      style={{
-        top: "36px",
-        background: "rgba(11, 18, 32, 0.92)",
-        backdropFilter: "blur(12px)",
-        borderBottom: "1px solid #2A3A52",
-      }}
-    >
-      <div className="max-w-6xl mx-auto px-4 sm:px-6">
-        <div className="flex items-center justify-between h-16">
-          <a href="#top" className="flex items-center gap-2 group">
-            <div
-              className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
-              style={{
-                background: "linear-gradient(135deg, #7C3AED, #A855F7)",
-              }}
-            >
-              ICP
-            </div>
-            <span
-              className="font-display font-bold text-lg"
-              style={{ color: "#EAF0FF" }}
-            >
-              ICP Hub
-            </span>
-          </a>
-
-          <div className="hidden md:flex items-center gap-6">
-            {navLinks.map((link) =>
-              link.external ? (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="nav-link text-sm font-medium"
-                  data-ocid={`nav.${link.label}.link`}
-                >
-                  {link.label}
-                </a>
-              ) : (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className={`nav-link text-sm font-medium ${
-                    activeSection === link.href.slice(1) ? "active" : ""
-                  }`}
-                  data-ocid={`nav.${link.label}.link`}
-                >
-                  {link.label}
-                </a>
-              ),
-            )}
-          </div>
-
-          <div className="hidden md:flex items-center gap-3">
-            {identity ? (
-              <>
-                <span
-                  className="text-xs font-mono px-3 py-1.5 rounded-full"
-                  style={{
-                    color: "#A855F7",
-                    background: "rgba(124,58,237,0.15)",
-                    border: "1px solid rgba(168,85,247,0.3)",
-                  }}
-                >
-                  {shortPrincipal}
-                </span>
-                <button
-                  type="button"
-                  onClick={clear}
-                  className="text-sm font-medium px-4 py-2 rounded-full transition-all hover:opacity-90"
-                  style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
-                  data-ocid="nav.logout.button"
-                >
-                  Выйти
-                </button>
-              </>
-            ) : (
-              <>
-                <button
-                  type="button"
-                  onClick={login}
-                  disabled={isLoggingIn}
-                  className="text-sm font-medium px-4 py-2 rounded-full transition-all disabled:opacity-50"
-                  style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
-                  data-ocid="nav.login.button"
-                >
-                  {isLoggingIn ? "Вход..." : "Войти"}
-                </button>
-                <button
-                  type="button"
-                  onClick={login}
-                  disabled={isLoggingIn}
-                  className="text-sm font-semibold px-4 py-2 rounded-full text-white transition-all hover:opacity-90 disabled:opacity-50"
-                  style={{
-                    background: "linear-gradient(135deg, #7C3AED, #A855F7)",
-                  }}
-                  data-ocid="nav.signup.button"
-                >
-                  {isLoggingIn ? "Вход..." : "Регистрация"}
-                </button>
-              </>
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="md:hidden p-2"
-            onClick={() => setMenuOpen(!menuOpen)}
-            style={{ color: "#EAF0FF" }}
-            data-ocid="nav.menu.toggle"
-          >
-            {menuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </div>
-
-      {menuOpen && (
-        <div
-          className="md:hidden"
-          style={{ background: "#121A2A", borderTop: "1px solid #2A3A52" }}
-        >
-          <div className="px-4 py-4 flex flex-col gap-3">
-            {navLinks.map((link) => (
-              <a
-                key={link.label}
-                href={link.href}
-                target={link.external ? "_blank" : undefined}
-                rel={link.external ? "noopener noreferrer" : undefined}
-                className="nav-link text-sm font-medium py-2"
-                onClick={() => setMenuOpen(false)}
-                data-ocid={`nav.mobile.${link.label}.link`}
+    <>
+      <nav
+        className="fixed left-0 right-0 z-40"
+        style={{
+          top: "36px",
+          background: "rgba(11, 18, 32, 0.92)",
+          backdropFilter: "blur(12px)",
+          borderBottom: "1px solid #2A3A52",
+        }}
+      >
+        <div className="max-w-6xl mx-auto px-4 sm:px-6">
+          <div className="flex items-center justify-between h-16">
+            <a href="#top" className="flex items-center gap-2 group">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold text-sm"
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                }}
               >
-                {link.label}
-              </a>
-            ))}
-            <div className="flex gap-3 pt-2">
+                ICP
+              </div>
+              <span
+                className="font-display font-bold text-lg"
+                style={{ color: "#EAF0FF" }}
+              >
+                ICP Hub
+              </span>
+            </a>
+
+            <div className="hidden md:flex items-center gap-6">
+              {navLinks.map((link) =>
+                link.external ? (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="nav-link text-sm font-medium"
+                    data-ocid={`nav.${link.label}.link`}
+                  >
+                    {link.label}
+                  </a>
+                ) : (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    className={`nav-link text-sm font-medium ${
+                      activeSection === link.href.slice(1) ? "active" : ""
+                    }`}
+                    data-ocid={`nav.${link.label}.link`}
+                  >
+                    {link.label}
+                  </a>
+                ),
+              )}
+            </div>
+
+            <div className="hidden md:flex items-center gap-3">
               {identity ? (
                 <>
-                  <span
-                    className="flex-1 text-xs font-mono text-center py-2 rounded-full"
+                  <button
+                    type="button"
+                    onClick={() => setProfileOpen(true)}
+                    className="text-xs font-mono px-3 py-1.5 rounded-full flex items-center gap-1.5 hover:opacity-80 transition-opacity"
                     style={{
                       color: "#A855F7",
                       background: "rgba(124,58,237,0.15)",
                       border: "1px solid rgba(168,85,247,0.3)",
                     }}
+                    data-ocid="nav.profile.button"
                   >
+                    <UserCircle size={14} />
                     {shortPrincipal}
-                  </span>
+                  </button>
                   <button
                     type="button"
                     onClick={clear}
-                    className="flex-1 text-sm py-2 rounded-full"
+                    className="text-sm font-medium px-4 py-2 rounded-full transition-all hover:opacity-90"
                     style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
-                    data-ocid="nav.mobile.logout.button"
+                    data-ocid="nav.logout.button"
                   >
                     Выйти
                   </button>
@@ -464,9 +396,9 @@ function Navbar({ activeSection }: { activeSection: string }) {
                     type="button"
                     onClick={login}
                     disabled={isLoggingIn}
-                    className="flex-1 text-sm py-2 rounded-full disabled:opacity-50"
+                    className="text-sm font-medium px-4 py-2 rounded-full transition-all disabled:opacity-50"
                     style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
-                    data-ocid="nav.mobile.login.button"
+                    data-ocid="nav.login.button"
                   >
                     {isLoggingIn ? "Вход..." : "Войти"}
                   </button>
@@ -474,21 +406,117 @@ function Navbar({ activeSection }: { activeSection: string }) {
                     type="button"
                     onClick={login}
                     disabled={isLoggingIn}
-                    className="flex-1 text-sm py-2 rounded-full font-semibold text-white disabled:opacity-50"
+                    className="text-sm font-semibold px-4 py-2 rounded-full text-white transition-all hover:opacity-90 disabled:opacity-50"
                     style={{
                       background: "linear-gradient(135deg, #7C3AED, #A855F7)",
                     }}
-                    data-ocid="nav.mobile.signup.button"
+                    data-ocid="nav.signup.button"
                   >
                     {isLoggingIn ? "Вход..." : "Регистрация"}
                   </button>
                 </>
               )}
             </div>
+
+            <button
+              type="button"
+              className="md:hidden p-2"
+              onClick={() => setMenuOpen(!menuOpen)}
+              style={{ color: "#EAF0FF" }}
+              data-ocid="nav.menu.toggle"
+            >
+              {menuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </div>
+
+        {menuOpen && (
+          <div
+            className="md:hidden"
+            style={{ background: "#121A2A", borderTop: "1px solid #2A3A52" }}
+          >
+            <div className="px-4 py-4 flex flex-col gap-3">
+              {navLinks.map((link) => (
+                <a
+                  key={link.label}
+                  href={link.href}
+                  target={link.external ? "_blank" : undefined}
+                  rel={link.external ? "noopener noreferrer" : undefined}
+                  className="nav-link text-sm font-medium py-2"
+                  onClick={() => setMenuOpen(false)}
+                  data-ocid={`nav.mobile.${link.label}.link`}
+                >
+                  {link.label}
+                </a>
+              ))}
+              <div className="flex gap-3 pt-2">
+                {identity ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProfileOpen(true);
+                        setMenuOpen(false);
+                      }}
+                      className="flex-1 text-xs font-mono text-center py-2 rounded-full flex items-center justify-center gap-1"
+                      style={{
+                        color: "#A855F7",
+                        background: "rgba(124,58,237,0.15)",
+                        border: "1px solid rgba(168,85,247,0.3)",
+                      }}
+                      data-ocid="nav.mobile.profile.button"
+                    >
+                      <UserCircle size={12} />
+                      {shortPrincipal}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={clear}
+                      className="flex-1 text-sm py-2 rounded-full"
+                      style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
+                      data-ocid="nav.mobile.logout.button"
+                    >
+                      Выйти
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      onClick={login}
+                      disabled={isLoggingIn}
+                      className="flex-1 text-sm py-2 rounded-full disabled:opacity-50"
+                      style={{ color: "#A9B4C7", border: "1px solid #2A3A52" }}
+                      data-ocid="nav.mobile.login.button"
+                    >
+                      {isLoggingIn ? "Вход..." : "Войти"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={login}
+                      disabled={isLoggingIn}
+                      className="flex-1 text-sm py-2 rounded-full font-semibold text-white disabled:opacity-50"
+                      style={{
+                        background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                      }}
+                      data-ocid="nav.mobile.signup.button"
+                    >
+                      {isLoggingIn ? "Вход..." : "Регистрация"}
+                    </button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+      </nav>
+      {identity && (
+        <MyProfileModal
+          open={profileOpen}
+          onClose={() => setProfileOpen(false)}
+        />
       )}
-    </nav>
+    </>
   );
 }
 
@@ -1712,6 +1740,549 @@ function Footer() {
   );
 }
 
+// ─── UserProfileModal ─────────────────────────────────────────────────────────
+
+interface UserProfileModalProps {
+  principal: Principal | null;
+  onClose: () => void;
+}
+
+function UserProfileModal({ principal, onClose }: UserProfileModalProps) {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const [profile, setProfile] = useState<{
+    displayName: string;
+    bio: string;
+  } | null>(null);
+  const [friendStatus, setFriendStatus] = useState<string>("none");
+  const [loading, setLoading] = useState(false);
+  const [actionLoading, setActionLoading] = useState(false);
+
+  const myPrincipal = identity?.getPrincipal().toString();
+  const isOwnProfile = principal && myPrincipal === principal.toString();
+
+  useEffect(() => {
+    if (!principal || !actor) return;
+    setLoading(true);
+    const a = actor as any;
+    const profilePromise = a.getUserProfile(principal).then((res: any) => {
+      const p = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      setProfile(p ?? null);
+    });
+    const statusPromise = identity
+      ? a.getFriendStatus(principal).then(setFriendStatus)
+      : Promise.resolve();
+    Promise.all([profilePromise, statusPromise]).finally(() =>
+      setLoading(false),
+    );
+  }, [principal, actor, identity]);
+
+  const handleFriendAction = async () => {
+    if (!actor || !principal) return;
+    setActionLoading(true);
+    try {
+      const a = actor as any;
+      if (friendStatus === "none") {
+        await a.sendFriendRequest(principal);
+        setFriendStatus("pending_sent");
+      } else if (friendStatus === "pending_received") {
+        await a.acceptFriendRequest(principal);
+        setFriendStatus("friends");
+      } else if (friendStatus === "friends") {
+        await a.removeFriend(principal);
+        setFriendStatus("none");
+      }
+    } catch (_) {}
+    setActionLoading(false);
+  };
+
+  const handleReject = async () => {
+    if (!actor || !principal) return;
+    setActionLoading(true);
+    try {
+      await (actor as any).rejectFriendRequest(principal);
+      setFriendStatus("none");
+    } catch (_) {}
+    setActionLoading(false);
+  };
+
+  const displayName =
+    profile?.displayName ||
+    (principal ? `${principal.toString().slice(0, 8)}...` : "");
+
+  return (
+    <Dialog open={!!principal} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent
+        className="sm:max-w-md"
+        style={{
+          background: "#131D2E",
+          border: "1px solid #2A3A52",
+          color: "#EAF0FF",
+        }}
+        data-ocid="user_profile.dialog"
+      >
+        <DialogHeader>
+          <DialogTitle style={{ color: "#EAF0FF" }}>
+            Профиль пользователя
+          </DialogTitle>
+        </DialogHeader>
+        {loading ? (
+          <div
+            className="flex items-center justify-center py-8"
+            data-ocid="user_profile.loading_state"
+          >
+            <div
+              className="w-6 h-6 rounded-full border-2 animate-spin"
+              style={{ borderColor: "#A855F7", borderTopColor: "transparent" }}
+            />
+          </div>
+        ) : (
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-3">
+              <div
+                className="w-12 h-12 rounded-full flex items-center justify-center text-lg font-bold"
+                style={{
+                  background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                }}
+              >
+                {displayName.slice(0, 1).toUpperCase()}
+              </div>
+              <div>
+                <p className="font-semibold" style={{ color: "#EAF0FF" }}>
+                  {displayName}
+                </p>
+                <p className="text-xs font-mono" style={{ color: "#4A5A6F" }}>
+                  {principal?.toString().slice(0, 20)}...
+                </p>
+              </div>
+            </div>
+            {profile?.bio && (
+              <p className="text-sm" style={{ color: "#A9B4C7" }}>
+                {profile.bio}
+              </p>
+            )}
+            {!isOwnProfile && identity && (
+              <div className="flex gap-2 mt-1">
+                {friendStatus === "pending_received" ? (
+                  <>
+                    <button
+                      type="button"
+                      onClick={handleFriendAction}
+                      disabled={actionLoading}
+                      className="flex-1 text-sm font-semibold py-2 rounded-xl text-white disabled:opacity-50"
+                      style={{
+                        background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                      }}
+                      data-ocid="user_profile.confirm_button"
+                    >
+                      {actionLoading ? "..." : "Принять"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleReject}
+                      disabled={actionLoading}
+                      className="flex-1 text-sm py-2 rounded-xl disabled:opacity-50"
+                      style={{ border: "1px solid #2A3A52", color: "#A9B4C7" }}
+                      data-ocid="user_profile.cancel_button"
+                    >
+                      {actionLoading ? "..." : "Отклонить"}
+                    </button>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={handleFriendAction}
+                    disabled={actionLoading || friendStatus === "pending_sent"}
+                    className="flex-1 text-sm font-semibold py-2 rounded-xl text-white disabled:opacity-50"
+                    style={{
+                      background:
+                        friendStatus === "friends"
+                          ? "rgba(239,68,68,0.15)"
+                          : "linear-gradient(135deg, #7C3AED, #A855F7)",
+                      border:
+                        friendStatus === "friends"
+                          ? "1px solid rgba(239,68,68,0.3)"
+                          : "none",
+                      color: friendStatus === "friends" ? "#EF4444" : "white",
+                    }}
+                    data-ocid="user_profile.primary_button"
+                  >
+                    {actionLoading
+                      ? "..."
+                      : friendStatus === "none"
+                        ? "Добавить в друзья"
+                        : friendStatus === "pending_sent"
+                          ? "Запрос отправлен"
+                          : "Удалить из друзей"}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+// ─── MyProfileModal ───────────────────────────────────────────────────────────
+
+interface MyProfileModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+function MyProfileModal({ open, onClose }: MyProfileModalProps) {
+  const { actor } = useActor();
+  const { identity } = useInternetIdentity();
+  const [displayName, setDisplayName] = useState("");
+  const [bio, setBio] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [friends, setFriends] = useState<
+    {
+      principal: Principal;
+      profile: { displayName: string; bio: string } | null;
+    }[]
+  >([]);
+  const [pendingRequests, setPendingRequests] = useState<
+    {
+      principal: Principal;
+      profile: { displayName: string; bio: string } | null;
+    }[]
+  >([]);
+  const [viewProfile, setViewProfile] = useState<Principal | null>(null);
+  const [editMode, setEditMode] = useState(false);
+
+  useEffect(() => {
+    if (!open || !actor || !identity) return;
+    setLoading(true);
+    const profileP = actor.getMyProfile().then((res) => {
+      const p = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      if (p) {
+        setDisplayName(p.displayName || "");
+        setBio(p.bio || "");
+      }
+    });
+    const friendsP = (actor as any)
+      .getFriends()
+      .then(async (principals: any[]) => {
+        const items = await Promise.all(
+          principals.map(async (pr: any) => {
+            const res = await (actor as any).getUserProfile(pr);
+            const prof = Array.isArray(res) && res.length > 0 ? res[0] : null;
+            return { principal: pr, profile: prof ?? null };
+          }),
+        );
+        setFriends(items);
+      });
+    const pendingP = (actor as any)
+      .getPendingFriendRequests()
+      .then(async (principals: any[]) => {
+        const items = await Promise.all(
+          principals.map(async (pr: any) => {
+            const res = await (actor as any).getUserProfile(pr);
+            const prof = Array.isArray(res) && res.length > 0 ? res[0] : null;
+            return { principal: pr, profile: prof ?? null };
+          }),
+        );
+        setPendingRequests(items);
+      });
+    Promise.all([profileP, friendsP, pendingP]).finally(() =>
+      setLoading(false),
+    );
+  }, [open, actor, identity]);
+
+  const handleSave = async () => {
+    if (!actor) return;
+    setSaving(true);
+    try {
+      await (actor as any).setProfile(displayName.trim(), bio.trim());
+      setEditMode(false);
+    } catch (_) {}
+    setSaving(false);
+  };
+
+  const handleAccept = async (pr: Principal) => {
+    if (!actor) return;
+    try {
+      await (actor as any).acceptFriendRequest(pr);
+      const res = await (actor as any).getUserProfile(pr);
+      const prof = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      setFriends((prev) => [...prev, { principal: pr, profile: prof ?? null }]);
+      setPendingRequests((prev) =>
+        prev.filter((r) => r.principal.toString() !== pr.toString()),
+      );
+    } catch (_) {}
+  };
+
+  const handleReject = async (pr: Principal) => {
+    if (!actor) return;
+    try {
+      await (actor as any).rejectFriendRequest(pr);
+      setPendingRequests((prev) =>
+        prev.filter((r) => r.principal.toString() !== pr.toString()),
+      );
+    } catch (_) {}
+  };
+
+  const myPrincipal = identity?.getPrincipal().toString();
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={(o) => !o && onClose()}>
+        <DialogContent
+          className="sm:max-w-lg max-h-[80vh] overflow-y-auto"
+          style={{
+            background: "#131D2E",
+            border: "1px solid #2A3A52",
+            color: "#EAF0FF",
+          }}
+          data-ocid="my_profile.dialog"
+        >
+          <DialogHeader>
+            <DialogTitle style={{ color: "#EAF0FF" }}>Мой профиль</DialogTitle>
+          </DialogHeader>
+          {loading ? (
+            <div
+              className="flex items-center justify-center py-8"
+              data-ocid="my_profile.loading_state"
+            >
+              <div
+                className="w-6 h-6 rounded-full border-2 animate-spin"
+                style={{
+                  borderColor: "#A855F7",
+                  borderTopColor: "transparent",
+                }}
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col gap-5">
+              <div className="flex items-center gap-3">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center text-xl font-bold shrink-0"
+                  style={{
+                    background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                  }}
+                >
+                  {(displayName || "?").slice(0, 1).toUpperCase()}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p
+                    className="font-semibold truncate"
+                    style={{ color: "#EAF0FF" }}
+                  >
+                    {displayName || "Без имени"}
+                  </p>
+                  <p
+                    className="text-xs font-mono truncate"
+                    style={{ color: "#4A5A6F" }}
+                  >
+                    {myPrincipal}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setEditMode(!editMode)}
+                  className="text-xs px-3 py-1.5 rounded-lg transition-colors shrink-0"
+                  style={{ border: "1px solid #2A3A52", color: "#A9B4C7" }}
+                  data-ocid="my_profile.edit_button"
+                >
+                  {editMode ? "Отмена" : "Изменить"}
+                </button>
+              </div>
+
+              {editMode && (
+                <div
+                  className="flex flex-col gap-3 p-4 rounded-xl"
+                  style={{
+                    background: "rgba(124,58,237,0.08)",
+                    border: "1px solid rgba(124,58,237,0.2)",
+                  }}
+                >
+                  <div>
+                    <span
+                      className="text-xs font-medium mb-1 block"
+                      style={{ color: "#A9B4C7" }}
+                    >
+                      Никнейм
+                    </span>
+                    <input
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value)}
+                      placeholder="Ваш никнейм..."
+                      className="w-full text-sm px-3 py-2 rounded-lg outline-none"
+                      style={{
+                        background: "#1A2433",
+                        color: "#EAF0FF",
+                        border: "1px solid #2A3A52",
+                      }}
+                      data-ocid="my_profile.input"
+                    />
+                  </div>
+                  <div>
+                    <span
+                      className="text-xs font-medium mb-1 block"
+                      style={{ color: "#A9B4C7" }}
+                    >
+                      О себе (необязательно)
+                    </span>
+                    <textarea
+                      id="my-profile-bio"
+                      value={bio}
+                      onChange={(e) => setBio(e.target.value)}
+                      placeholder="Расскажите о себе..."
+                      rows={3}
+                      className="w-full text-sm px-3 py-2 rounded-lg outline-none resize-none"
+                      style={{
+                        background: "#1A2433",
+                        color: "#EAF0FF",
+                        border: "1px solid #2A3A52",
+                      }}
+                      data-ocid="my_profile.textarea"
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    onClick={handleSave}
+                    disabled={saving || !displayName.trim()}
+                    className="text-sm font-semibold py-2 rounded-xl text-white disabled:opacity-50 transition-all"
+                    style={{
+                      background: "linear-gradient(135deg, #7C3AED, #A855F7)",
+                    }}
+                    data-ocid="my_profile.save_button"
+                  >
+                    {saving ? "Сохранение..." : "Сохранить"}
+                  </button>
+                </div>
+              )}
+
+              {!editMode && bio && (
+                <p className="text-sm" style={{ color: "#A9B4C7" }}>
+                  {bio}
+                </p>
+              )}
+
+              {pendingRequests.length > 0 && (
+                <div>
+                  <p
+                    className="text-xs font-semibold uppercase tracking-wider mb-2"
+                    style={{ color: "#2BC4B4" }}
+                  >
+                    Запросы в друзья ({pendingRequests.length})
+                  </p>
+                  <div className="flex flex-col gap-2">
+                    {pendingRequests.map((req, i) => (
+                      <div
+                        key={req.principal.toString()}
+                        className="flex items-center gap-2 p-2 rounded-lg"
+                        style={{
+                          background: "rgba(43,196,180,0.07)",
+                          border: "1px solid rgba(43,196,180,0.15)",
+                        }}
+                        data-ocid={`my_profile.item.${i + 1}`}
+                      >
+                        <button
+                          type="button"
+                          className="flex-1 text-left text-sm font-medium truncate hover:underline"
+                          style={{ color: "#EAF0FF" }}
+                          onClick={() => setViewProfile(req.principal)}
+                        >
+                          {req.profile?.displayName ||
+                            `${req.principal.toString().slice(0, 8)}...`}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleAccept(req.principal)}
+                          className="text-xs px-2 py-1 rounded-lg font-semibold text-white shrink-0"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #7C3AED, #A855F7)",
+                          }}
+                          data-ocid="my_profile.confirm_button"
+                        >
+                          Принять
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleReject(req.principal)}
+                          className="text-xs px-2 py-1 rounded-lg shrink-0"
+                          style={{
+                            border: "1px solid #2A3A52",
+                            color: "#A9B4C7",
+                          }}
+                          data-ocid="my_profile.cancel_button"
+                        >
+                          Отклонить
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <div>
+                <p
+                  className="text-xs font-semibold uppercase tracking-wider mb-2"
+                  style={{ color: "#A855F7" }}
+                >
+                  Друзья ({friends.length})
+                </p>
+                {friends.length === 0 ? (
+                  <p
+                    className="text-sm"
+                    style={{ color: "#4A5A6F" }}
+                    data-ocid="my_profile.empty_state"
+                  >
+                    Друзей пока нет
+                  </p>
+                ) : (
+                  <div className="flex flex-col gap-1">
+                    {friends.map((fr, i) => (
+                      <button
+                        type="button"
+                        key={fr.principal.toString()}
+                        onClick={() => setViewProfile(fr.principal)}
+                        className="flex items-center gap-2 px-3 py-2 rounded-lg text-left hover:bg-white/5 transition-colors w-full"
+                        data-ocid={`my_profile.item.${i + 1}`}
+                      >
+                        <div
+                          className="w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0"
+                          style={{
+                            background:
+                              "linear-gradient(135deg, #7C3AED, #A855F7)",
+                          }}
+                        >
+                          {(fr.profile?.displayName || "?")
+                            .slice(0, 1)
+                            .toUpperCase()}
+                        </div>
+                        <span
+                          className="text-sm truncate"
+                          style={{ color: "#EAF0FF" }}
+                        >
+                          {fr.profile?.displayName ||
+                            `${fr.principal.toString().slice(0, 8)}...`}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+      {viewProfile && (
+        <UserProfileModal
+          principal={viewProfile}
+          onClose={() => setViewProfile(null)}
+        />
+      )}
+    </>
+  );
+}
+
 // ─── Chat Widget ──────────────────────────────────────────────────────────────
 
 function formatTime(ts: bigint): string {
@@ -1728,6 +2299,10 @@ function ChatWidget() {
   const [showNamePrompt, setShowNamePrompt] = useState(false);
   const [displayName, setDisplayName] = useState("");
   const [savingName, setSavingName] = useState(false);
+  const [selectedProfile, setSelectedProfile] = useState<Principal | null>(
+    null,
+  );
+  const [bio, setBio] = useState("");
   const bottomRef = useRef<HTMLDivElement>(null);
   const { identity } = useInternetIdentity();
   const { actor } = useActor();
@@ -1783,7 +2358,7 @@ function ChatWidget() {
     if (!actor || !displayName.trim()) return;
     setSavingName(true);
     try {
-      await actor.setDisplayName(displayName.trim());
+      await (actor as any).setProfile(displayName.trim(), bio.trim());
       setShowNamePrompt(false);
     } catch (_) {}
     setSavingName(false);
@@ -1861,19 +2436,32 @@ function ChatWidget() {
                   borderBottom: "1px solid rgba(124,58,237,0.2)",
                 }}
               >
-                <input
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
-                  placeholder="Введите ваше имя..."
-                  className="flex-1 text-sm px-3 py-1.5 rounded-lg outline-none"
-                  style={{
-                    background: "#1A2433",
-                    color: "#EAF0FF",
-                    border: "1px solid #2A3A52",
-                  }}
-                  data-ocid="chat.input"
-                />
+                <div className="flex flex-col gap-2 flex-1">
+                  <input
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSaveName()}
+                    placeholder="Ваш никнейм..."
+                    className="w-full text-sm px-3 py-1.5 rounded-lg outline-none"
+                    style={{
+                      background: "#1A2433",
+                      color: "#EAF0FF",
+                      border: "1px solid #2A3A52",
+                    }}
+                    data-ocid="chat.input"
+                  />
+                  <input
+                    value={bio}
+                    onChange={(e) => setBio(e.target.value)}
+                    placeholder="О себе (необязательно)..."
+                    className="w-full text-sm px-3 py-1.5 rounded-lg outline-none"
+                    style={{
+                      background: "#1A2433",
+                      color: "#EAF0FF",
+                      border: "1px solid #2A3A52",
+                    }}
+                  />
+                </div>
                 <button
                   type="button"
                   onClick={handleSaveName}
@@ -1919,13 +2507,15 @@ function ChatWidget() {
                   data-ocid={`chat.item.${i + 1}`}
                 >
                   <div className="flex items-baseline gap-2">
-                    <span
-                      className="text-xs font-semibold"
+                    <button
+                      type="button"
+                      className="text-xs font-semibold hover:underline"
                       style={{ color: "#A855F7" }}
+                      onClick={() => setSelectedProfile(msg.sender)}
                     >
                       {msg.displayName ||
                         `${msg.sender.toString().slice(0, 8)}...`}
-                    </span>
+                    </button>
                     <span className="text-xs" style={{ color: "#4A5A6F" }}>
                       {formatTime(msg.timestamp)}
                     </span>
@@ -2021,6 +2611,12 @@ function ChatWidget() {
           </span>
         )}
       </motion.button>
+      {selectedProfile && (
+        <UserProfileModal
+          principal={selectedProfile}
+          onClose={() => setSelectedProfile(null)}
+        />
+      )}
     </div>
   );
 }

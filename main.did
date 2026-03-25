@@ -1,0 +1,67 @@
+type http_request_result = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type http_header = 
+ record {
+   name: text;
+   value: text;
+ };
+type UserRole = 
+ variant {
+   admin;
+   guest;
+   user;
+ };
+type UserProfile = 
+ record {
+   bio: text;
+   displayName: text;
+ };
+type TransformationOutput = 
+ record {
+   body: blob;
+   headers: vec http_header;
+   status: nat;
+ };
+type TransformationInput = 
+ record {
+   context: blob;
+   response: http_request_result;
+ };
+type Time = int;
+type ChatMessage = 
+ record {
+   displayName: text;
+   sender: principal;
+   "text": text;
+   timestamp: Time;
+ };
+service : {
+  _initializeAccessControlWithSecret: (userSecret: text) -> ();
+  acceptFriendRequest: (from: principal) -> ();
+  assignCallerUserRole: (user: principal, role: UserRole) -> ();
+  getAllUsers: () -> (vec record {
+                            principal;
+                            UserProfile;
+                          }) query;
+  getCallerUserRole: () -> (UserRole) query;
+  getChatMessages: () -> (vec ChatMessage) query;
+  getCurrentIcpPrice: () -> (text);
+  getFriendStatus: (other: principal) -> (text) query;
+  getFriends: () -> (vec principal) query;
+  getIcpPriceHistory: () -> (text);
+  getMyProfile: () -> (opt UserProfile) query;
+  getPendingFriendRequests: () -> (vec principal) query;
+  getUserProfile: (user: principal) -> (opt UserProfile) query;
+  isCallerAdmin: () -> (bool) query;
+  rejectFriendRequest: (from: principal) -> ();
+  removeFriend: (friend: principal) -> ();
+  sendChatMessage: ("text": text) -> ();
+  sendFriendRequest: (to: principal) -> ();
+  setDisplayName: (displayName: text) -> ();
+  setProfile: (displayName: text, bio: text) -> ();
+  transform: (input: TransformationInput) -> (TransformationOutput) query;
+}
