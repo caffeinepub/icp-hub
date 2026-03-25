@@ -30,6 +30,7 @@ export interface ChatMessage {
 }
 export interface UserProfile {
     displayName: string;
+    bio: string;
 }
 export interface http_header {
     value: string;
@@ -48,8 +49,17 @@ export interface backendInterface {
     getIcpPriceHistory(): Promise<string>;
     getMyProfile(): Promise<UserProfile | null>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
+    getAllUsers(): Promise<Array<[Principal, UserProfile]>>;
     isCallerAdmin(): Promise<boolean>;
     sendChatMessage(text: string): Promise<void>;
     setDisplayName(displayName: string): Promise<void>;
+    setProfile(displayName: string, bio: string): Promise<void>;
+    getFriends(): Promise<Array<Principal>>;
+    getFriendStatus(other: Principal): Promise<string>;
+    getPendingFriendRequests(): Promise<Array<Principal>>;
+    sendFriendRequest(to: Principal): Promise<void>;
+    acceptFriendRequest(from: Principal): Promise<void>;
+    rejectFriendRequest(from: Principal): Promise<void>;
+    removeFriend(friend: Principal): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
 }

@@ -112,6 +112,7 @@ export interface ChatMessage {
 }
 export interface UserProfile {
     displayName: string;
+    bio: string;
 }
 export interface http_header {
     value: string;
@@ -134,6 +135,15 @@ export interface backendInterface {
     isCallerAdmin(): Promise<boolean>;
     sendChatMessage(text: string): Promise<void>;
     setDisplayName(displayName: string): Promise<void>;
+    setProfile(displayName: string, bio: string): Promise<void>;
+    getAllUsers(): Promise<Array<[Principal, UserProfile]>>;
+    getFriends(): Promise<Array<Principal>>;
+    getFriendStatus(other: Principal): Promise<string>;
+    getPendingFriendRequests(): Promise<Array<Principal>>;
+    sendFriendRequest(to: Principal): Promise<void>;
+    acceptFriendRequest(from: Principal): Promise<void>;
+    rejectFriendRequest(from: Principal): Promise<void>;
+    removeFriend(friend: Principal): Promise<void>;
     transform(input: TransformationInput): Promise<TransformationOutput>;
 }
 import type { UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
@@ -292,6 +302,42 @@ export class Backend implements backendInterface {
             const result = await this.actor.setDisplayName(arg0);
             return result;
         }
+    }
+    async setProfile(arg0: string, arg1: string): Promise<void> {
+        const result = await this.actor.setProfile(arg0, arg1);
+        return result;
+    }
+    async getAllUsers(): Promise<Array<[Principal, UserProfile]>> {
+        const result = await this.actor.getAllUsers();
+        return result;
+    }
+    async getFriends(): Promise<Array<Principal>> {
+        const result = await this.actor.getFriends();
+        return result;
+    }
+    async getFriendStatus(arg0: Principal): Promise<string> {
+        const result = await this.actor.getFriendStatus(arg0);
+        return result;
+    }
+    async getPendingFriendRequests(): Promise<Array<Principal>> {
+        const result = await this.actor.getPendingFriendRequests();
+        return result;
+    }
+    async sendFriendRequest(arg0: Principal): Promise<void> {
+        const result = await this.actor.sendFriendRequest(arg0);
+        return result;
+    }
+    async acceptFriendRequest(arg0: Principal): Promise<void> {
+        const result = await this.actor.acceptFriendRequest(arg0);
+        return result;
+    }
+    async rejectFriendRequest(arg0: Principal): Promise<void> {
+        const result = await this.actor.rejectFriendRequest(arg0);
+        return result;
+    }
+    async removeFriend(arg0: Principal): Promise<void> {
+        const result = await this.actor.removeFriend(arg0);
+        return result;
     }
     async transform(arg0: TransformationInput): Promise<TransformationOutput> {
         if (this.processError) {

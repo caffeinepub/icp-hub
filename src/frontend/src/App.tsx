@@ -1764,9 +1764,9 @@ function UserProfileModal({ principal, onClose }: UserProfileModalProps) {
   useEffect(() => {
     if (!principal || !actor) return;
     setLoading(true);
-    const a = actor as any;
+    const a = actor;
     const profilePromise = a.getUserProfile(principal).then((res: any) => {
-      const p = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      const p = res ?? null;
       setProfile(p ?? null);
     });
     const statusPromise = identity
@@ -1781,7 +1781,7 @@ function UserProfileModal({ principal, onClose }: UserProfileModalProps) {
     if (!actor || !principal) return;
     setActionLoading(true);
     try {
-      const a = actor as any;
+      const a = actor;
       if (friendStatus === "none") {
         await a.sendFriendRequest(principal);
         setFriendStatus("pending_sent");
@@ -1800,7 +1800,7 @@ function UserProfileModal({ principal, onClose }: UserProfileModalProps) {
     if (!actor || !principal) return;
     setActionLoading(true);
     try {
-      await (actor as any).rejectFriendRequest(principal);
+      await actor.rejectFriendRequest(principal);
       setFriendStatus("none");
     } catch (_) {}
     setActionLoading(false);
@@ -1958,31 +1958,29 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
     if (!open || !actor || !identity) return;
     setLoading(true);
     const profileP = actor.getMyProfile().then((res) => {
-      const p = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      const p = res ?? null;
       if (p) {
         setDisplayName(p.displayName || "");
         setBio(p.bio || "");
       }
     });
-    const friendsP = (actor as any)
-      .getFriends()
-      .then(async (principals: any[]) => {
-        const items = await Promise.all(
-          principals.map(async (pr: any) => {
-            const res = await (actor as any).getUserProfile(pr);
-            const prof = Array.isArray(res) && res.length > 0 ? res[0] : null;
-            return { principal: pr, profile: prof ?? null };
-          }),
-        );
-        setFriends(items);
-      });
-    const pendingP = (actor as any)
+    const friendsP = actor.getFriends().then(async (principals: any[]) => {
+      const items = await Promise.all(
+        principals.map(async (pr: any) => {
+          const res = await actor.getUserProfile(pr);
+          const prof = res ?? null;
+          return { principal: pr, profile: prof ?? null };
+        }),
+      );
+      setFriends(items);
+    });
+    const pendingP = actor
       .getPendingFriendRequests()
       .then(async (principals: any[]) => {
         const items = await Promise.all(
           principals.map(async (pr: any) => {
-            const res = await (actor as any).getUserProfile(pr);
-            const prof = Array.isArray(res) && res.length > 0 ? res[0] : null;
+            const res = await actor.getUserProfile(pr);
+            const prof = res ?? null;
             return { principal: pr, profile: prof ?? null };
           }),
         );
@@ -1997,7 +1995,7 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
     if (!actor) return;
     setSaving(true);
     try {
-      await (actor as any).setProfile(displayName.trim(), bio.trim());
+      await actor.setProfile(displayName.trim(), bio.trim());
       setEditMode(false);
     } catch (_) {}
     setSaving(false);
@@ -2006,9 +2004,9 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
   const handleAccept = async (pr: Principal) => {
     if (!actor) return;
     try {
-      await (actor as any).acceptFriendRequest(pr);
-      const res = await (actor as any).getUserProfile(pr);
-      const prof = Array.isArray(res) && res.length > 0 ? res[0] : null;
+      await actor.acceptFriendRequest(pr);
+      const res = await actor.getUserProfile(pr);
+      const prof = res ?? null;
       setFriends((prev) => [...prev, { principal: pr, profile: prof ?? null }]);
       setPendingRequests((prev) =>
         prev.filter((r) => r.principal.toString() !== pr.toString()),
@@ -2019,7 +2017,7 @@ function MyProfileModal({ open, onClose }: MyProfileModalProps) {
   const handleReject = async (pr: Principal) => {
     if (!actor) return;
     try {
-      await (actor as any).rejectFriendRequest(pr);
+      await actor.rejectFriendRequest(pr);
       setPendingRequests((prev) =>
         prev.filter((r) => r.principal.toString() !== pr.toString()),
       );
@@ -2358,7 +2356,7 @@ function ChatWidget() {
     if (!actor || !displayName.trim()) return;
     setSavingName(true);
     try {
-      await (actor as any).setProfile(displayName.trim(), bio.trim());
+      await actor.setProfile(displayName.trim(), bio.trim());
       setShowNamePrompt(false);
     } catch (_) {}
     setSavingName(false);
