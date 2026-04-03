@@ -1066,6 +1066,8 @@ interface NewsItem {
   category: string;
 }
 
+const PAGE_SIZE = 12;
+
 const FALLBACK_NEWS: NewsItem[] = [
   {
     title: "ICP превысил 1 миллиард транзакций на блокчейне",
@@ -1081,8 +1083,7 @@ const FALLBACK_NEWS: NewsItem[] = [
     title: "DFINITY объявляет о Chain Fusion v2",
     date: "22 мар 2026",
     source: "DFINITY Blog",
-    excerpt:
-      "Технология Chain Fusion получила крупное обновление, обеспечивающее бесшовную совместимость с Ethereum, Bitcoin и Solana.",
+    excerpt: "Технология Chain Fusion получила крупное обновление.",
     link: "https://dfinity.org/blog",
     gradient: "linear-gradient(135deg, #7C3AED 0%, #4CC9F0 100%)",
     category: "DFINITY",
@@ -1091,8 +1092,7 @@ const FALLBACK_NEWS: NewsItem[] = [
     title: "Internet Identity теперь поддерживает Passkeys",
     date: "18 мар 2026",
     source: "ICP.news",
-    excerpt:
-      "Web3-аутентификация стала проще: Internet Identity интегрировала поддержку WebAuthn passkey во всех браузерах.",
+    excerpt: "Web3-аутентификация стала проще.",
     link: "https://icp.news",
     gradient: "linear-gradient(135deg, #4CC9F0 0%, #A855F7 100%)",
     category: "ICP",
@@ -1101,8 +1101,7 @@ const FALLBACK_NEWS: NewsItem[] = [
     title: "Новый DEX на ICP достиг $50M TVL за первую неделю",
     date: "15 мар 2026",
     source: "CoinDesk",
-    excerpt:
-      "ICPSwap v3 запустился с пулами сконцентрированной ликвидности и набрал $50M TVL в рекордные сроки.",
+    excerpt: "ICPSwap v3 запустился с пулами сконцентрированной ликвидности.",
     link: "https://coindesk.com",
     gradient: "linear-gradient(135deg, #2BC4B4 0%, #7C3AED 100%)",
     category: "Media",
@@ -1111,11 +1110,19 @@ const FALLBACK_NEWS: NewsItem[] = [
     title: "DFINITY Foundation вступила в Hyperledger",
     date: "12 мар 2026",
     source: "DFINITY Blog",
-    excerpt:
-      "DFINITY стала премиум-членом Hyperledger Foundation, принося on-chain управление ICP в корпоративный сектор.",
+    excerpt: "DFINITY стала премиум-членом Hyperledger Foundation.",
     link: "https://dfinity.org/blog",
     gradient: "linear-gradient(135deg, #7C3AED 0%, #4CC9F0 100%)",
     category: "DFINITY",
+  },
+  {
+    title: "ICP в топ-20 крипто по рыночной капитализации",
+    date: "10 мар 2026",
+    source: "Cointelegraph",
+    excerpt: "После обновления протокола ICP вошёл в топ-20 криптовалют.",
+    link: "https://cointelegraph.com",
+    gradient: "linear-gradient(135deg, #F5C542 0%, #7C3AED 100%)",
+    category: "Media",
   },
 ];
 
@@ -1129,6 +1136,9 @@ const GRADIENT_MAP: Record<string, string> = {
   Forum: "linear-gradient(135deg, #3B82F6 0%, #7C3AED 100%)",
   Decrypt: "linear-gradient(135deg, #EC4899 0%, #7C3AED 100%)",
   BeInCrypto: "linear-gradient(135deg, #10B981 0%, #4CC9F0 100%)",
+  Messari: "linear-gradient(135deg, #6366F1 0%, #4CC9F0 100%)",
+  Bankless: "linear-gradient(135deg, #F59E0B 0%, #7C3AED 100%)",
+  CoinGecko: "linear-gradient(135deg, #84CC16 0%, #4CC9F0 100%)",
 };
 
 const ICP_KEYWORDS = [
@@ -1137,7 +1147,6 @@ const ICP_KEYWORDS = [
   "DFINITY",
   "dfinity",
   "icp",
-  "Интернет Компьютер",
   "canister",
   "motoko",
   "chain fusion",
@@ -1145,6 +1154,12 @@ const ICP_KEYWORDS = [
   "SNS",
   "ckBTC",
   "ckETH",
+  "chain key",
+  "internet identity",
+  "openchat",
+  "dscvr",
+  "sonic",
+  "icpswap",
 ];
 
 function isIcpRelated(title: string, desc: string): boolean {
@@ -1169,14 +1184,15 @@ function formatDateRu(dateStr: string): string {
 function stripHtml(html: string): string {
   return html
     .replace(/<[^>]+>/g, "")
-    .replace(/&[a-z]+;/gi, " ")
+    .replace(/&[a-z#0-9]+;/gi, " ")
+    .replace(/\s+/g, " ")
     .trim();
 }
 
 async function fetchWithTimeout(
   url: string,
   options: RequestInit = {},
-  timeoutMs = 7000,
+  timeoutMs = 8000,
 ): Promise<Response> {
   const controller = new AbortController();
   const id = setTimeout(() => controller.abort(), timeoutMs);
@@ -1188,15 +1204,64 @@ async function fetchWithTimeout(
   }
 }
 
-// Fetch via allorigins.win CORS proxy — returns raw content
+const CORS_PROXIES = [
+  (url: string) =>
+    `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+  (url: string) => `https://corsproxy.io/?${encodeURIComponent(url)}`,
+  (url: string) =>
+    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+];
+
 async function fetchViaProxy(url: string): Promise<string> {
-  const proxy = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
-  const res = await fetchWithTimeout(proxy);
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  return res.text();
+  let lastErr: Error = new Error("All proxies failed");
+  for (const makeProxy of CORS_PROXIES) {
+    try {
+      const proxyUrl = makeProxy(url);
+      const res = await fetchWithTimeout(proxyUrl, {}, 9000);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const text = await res.text();
+      if (text && text.length > 100) return text;
+    } catch (e) {
+      lastErr = e as Error;
+    }
+  }
+  throw lastErr;
 }
 
-// Parse RSS/Atom XML string into NewsItems
+async function fetchViaRss2Json(
+  url: string,
+  category: string,
+  source: string,
+): Promise<NewsItem[]> {
+  try {
+    const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}&count=20`;
+    const res = await fetchWithTimeout(apiUrl, {}, 9000);
+    if (!res.ok) return [];
+    const data = await res.json();
+    if (!data.items || !Array.isArray(data.items)) return [];
+    return (data.items as any[])
+      .filter((item) =>
+        isIcpRelated(
+          item.title || "",
+          stripHtml(item.description || item.content || ""),
+        ),
+      )
+      .map((item) => ({
+        title: (item.title || "").slice(0, 120),
+        excerpt:
+          stripHtml(item.description || item.content || "").slice(0, 200) ||
+          "Читать статью",
+        date: formatDateRu(item.pubDate || ""),
+        source,
+        link: item.link || item.guid || "#",
+        gradient: GRADIENT_MAP[category] || GRADIENT_MAP.Media,
+        category,
+      }));
+  } catch {
+    return [];
+  }
+}
+
 function parseRssXml(
   xml: string,
   category: string,
@@ -1206,6 +1271,7 @@ function parseRssXml(
   try {
     const parser = new DOMParser();
     const doc = parser.parseFromString(xml, "text/xml");
+    if (doc.querySelector("parsererror")) return [];
     const items = Array.from(doc.querySelectorAll("item, entry"));
     const results: NewsItem[] = [];
     for (const item of items) {
@@ -1213,14 +1279,16 @@ function parseRssXml(
         item.querySelector("title")?.textContent || "",
       ).slice(0, 120);
       const desc = stripHtml(
-        item.querySelector("description, summary, content")?.textContent || "",
+        item.querySelector("description, summary")?.textContent || "",
       ).slice(0, 200);
       if (!title) continue;
       if (filterIcp && !isIcpRelated(title, desc)) continue;
-      const link =
-        item.querySelector("link")?.getAttribute("href") ||
-        item.querySelector("link")?.textContent ||
-        "#";
+      const linkEl = item.querySelector("link");
+      const link = (
+        linkEl?.getAttribute("href") ||
+        linkEl?.textContent ||
+        "#"
+      ).trim();
       const pubDate =
         item.querySelector("pubDate, published, updated")?.textContent || "";
       results.push({
@@ -1228,7 +1296,7 @@ function parseRssXml(
         excerpt: desc || "Читать статью на сайте источника",
         date: formatDateRu(pubDate),
         source,
-        link: link.trim(),
+        link,
         gradient: GRADIENT_MAP[category] || GRADIENT_MAP.Media,
         category,
       });
@@ -1239,21 +1307,29 @@ function parseRssXml(
   }
 }
 
-async function fetchRedditDirect(subreddit: string): Promise<NewsItem[]> {
-  const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=20`;
-  const res = await fetchWithTimeout(url, {
-    headers: { Accept: "application/json" },
-  });
-  const text = await res.text();
+async function fetchRssSource(src: RssSource): Promise<NewsItem[]> {
   try {
-    const data = JSON.parse(text);
+    const xml = await fetchViaProxy(src.url);
+    const items = parseRssXml(xml, src.category, src.source, src.filterIcp);
+    if (items.length > 0) return items;
+    return fetchViaRss2Json(src.url, src.category, src.source);
+  } catch {
+    return fetchViaRss2Json(src.url, src.category, src.source);
+  }
+}
+
+async function fetchRedditDirect(subreddit: string): Promise<NewsItem[]> {
+  try {
+    const url = `https://www.reddit.com/r/${subreddit}/hot.json?limit=25`;
+    const res = await fetchWithTimeout(url, {
+      headers: { Accept: "application/json" },
+    });
+    const data = await res.json();
     const children = data?.data?.children;
     if (!Array.isArray(children)) return [];
-    return children
-      .filter((c: any) =>
-        isIcpRelated(c.data?.title || "", c.data?.selftext || ""),
-      )
-      .map((c: any) => ({
+    return (children as any[])
+      .filter((c) => isIcpRelated(c.data?.title || "", c.data?.selftext || ""))
+      .map((c) => ({
         title: (c.data?.title || "").slice(0, 120),
         excerpt:
           (c.data?.selftext || "").slice(0, 200) || "Обсуждение на Reddit",
@@ -1299,6 +1375,12 @@ const RSS_SOURCES: RssSource[] = [
     filterIcp: false,
   },
   {
+    url: "https://forum.dfinity.org/c/announcements/7.rss",
+    category: "DFINITY",
+    source: "DFINITY Announcements",
+    filterIcp: false,
+  },
+  {
     url: "https://www.coindesk.com/arc/outboundfeeds/rss/",
     category: "Media",
     source: "CoinDesk",
@@ -1329,9 +1411,15 @@ const RSS_SOURCES: RssSource[] = [
     filterIcp: true,
   },
   {
-    url: "https://coinjournal.net/feed/",
-    category: "Media",
-    source: "CoinJournal",
+    url: "https://messari.io/rss",
+    category: "Messari",
+    source: "Messari",
+    filterIcp: true,
+  },
+  {
+    url: "https://blog.coingecko.com/feed/",
+    category: "CoinGecko",
+    source: "CoinGecko Blog",
     filterIcp: true,
   },
   {
@@ -1340,13 +1428,34 @@ const RSS_SOURCES: RssSource[] = [
     source: "The Defiant",
     filterIcp: true,
   },
+  {
+    url: "https://banklesshq.com/feed",
+    category: "Bankless",
+    source: "Bankless",
+    filterIcp: true,
+  },
+  {
+    url: "https://www.theblock.co/rss.xml",
+    category: "Media",
+    source: "The Block",
+    filterIcp: true,
+  },
+  {
+    url: "https://cryptopotato.com/feed/",
+    category: "Media",
+    source: "CryptoPotato",
+    filterIcp: true,
+  },
 ];
 
 function useIcpNews() {
-  const [news, setNews] = useState<NewsItem[]>([]);
+  const [allNews, setAllNews] = useState<NewsItem[]>([]);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
   const [loading, setLoading] = useState(true);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
+  const [sourcesLoaded, setSourcesLoaded] = useState(0);
   const [tick, setTick] = useState(0);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: tick is intentional refresh trigger
@@ -1354,19 +1463,34 @@ function useIcpNews() {
     let cancelled = false;
     setLoading(true);
     setError(null);
+    setSourcesLoaded(0);
+    setVisibleCount(PAGE_SIZE);
 
-    const rssPromises = RSS_SOURCES.map((src) =>
-      fetchViaProxy(src.url)
-        .then((xml) =>
-          parseRssXml(xml, src.category, src.source, src.filterIcp),
-        )
-        .catch(() => [] as NewsItem[]),
-    );
+    const bump = () => {
+      if (!cancelled) setSourcesLoaded((n) => n + 1);
+    };
 
     const fetchers = [
-      fetchRedditDirect("dfinity").catch(() => [] as NewsItem[]),
-      fetchRedditDirect("InternetComputer").catch(() => [] as NewsItem[]),
-      ...rssPromises,
+      fetchRedditDirect("dfinity")
+        .then((r) => {
+          bump();
+          return r;
+        })
+        .catch(() => [] as NewsItem[]),
+      fetchRedditDirect("InternetComputer")
+        .then((r) => {
+          bump();
+          return r;
+        })
+        .catch(() => [] as NewsItem[]),
+      ...RSS_SOURCES.map((src) =>
+        fetchRssSource(src)
+          .then((r) => {
+            bump();
+            return r;
+          })
+          .catch(() => [] as NewsItem[]),
+      ),
     ];
 
     Promise.allSettled(fetchers).then((results) => {
@@ -1377,20 +1501,26 @@ function useIcpNews() {
       }
       const seen = new Set<string>();
       const deduped = all.filter((item) => {
-        if (!item.title || seen.has(item.link)) return false;
-        seen.add(item.link);
+        const key = item.link && item.link !== "#" ? item.link : item.title;
+        if (!item.title || seen.has(key)) return false;
+        seen.add(key);
         return true;
       });
-      deduped.sort(
-        (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime(),
-      );
+      deduped.sort((a, b) => {
+        const da = new Date(a.date).getTime();
+        const db = new Date(b.date).getTime();
+        if (Number.isNaN(da) && Number.isNaN(db)) return 0;
+        if (Number.isNaN(da)) return 1;
+        if (Number.isNaN(db)) return -1;
+        return db - da;
+      });
       if (deduped.length === 0) {
-        setNews(FALLBACK_NEWS);
+        setAllNews(FALLBACK_NEWS);
         setError(
           "Не удалось загрузить актуальные новости, показываем кешированные",
         );
       } else {
-        setNews(deduped.slice(0, 30));
+        setAllNews(deduped);
       }
       setLastUpdated(new Date());
       setLoading(false);
@@ -1402,28 +1532,66 @@ function useIcpNews() {
   }, [tick]);
 
   const refresh = useCallback(() => setTick((t) => t + 1), []);
-  return { news, loading, error, lastUpdated, refresh };
+
+  const loadMore = useCallback(() => {
+    setLoadingMore(true);
+    setTimeout(() => {
+      setVisibleCount((c) => c + PAGE_SIZE);
+      setLoadingMore(false);
+    }, 300);
+  }, []);
+
+  return {
+    allNews,
+    visibleCount,
+    loading,
+    loadingMore,
+    error,
+    lastUpdated,
+    refresh,
+    loadMore,
+    sourcesLoaded,
+    totalSources: RSS_SOURCES.length + 2,
+  };
 }
 
 function NewsSection() {
-  const { news, loading, error, lastUpdated, refresh } = useIcpNews();
+  const {
+    allNews,
+    visibleCount,
+    loading,
+    loadingMore,
+    error,
+    lastUpdated,
+    refresh,
+    loadMore,
+    sourcesLoaded,
+    totalSources,
+  } = useIcpNews();
   const [activeCategory, setActiveCategory] = useState("Все");
+
   const categories = [
     "Все",
     "ICP",
     "DFINITY",
     "Reddit",
+    "Forum",
     "Media",
     "Cointelegraph",
     "CryptoSlate",
-    "Forum",
     "Decrypt",
     "BeInCrypto",
+    "Messari",
+    "Bankless",
+    "CoinGecko",
   ];
+
   const filtered =
     activeCategory === "Все"
-      ? news
-      : news.filter((n) => n.category === activeCategory);
+      ? allNews
+      : allNews.filter((n) => n.category === activeCategory);
+  const visible = filtered.slice(0, visibleCount);
+  const hasMoreFiltered = visibleCount < filtered.length;
 
   return (
     <section id="news" className="py-20 px-4">
@@ -1431,19 +1599,22 @@ function NewsSection() {
         <div className="flex items-center justify-between mb-6 flex-wrap gap-4">
           <div>
             <h2 className="text-3xl font-bold text-white">Новости ICP</h2>
-            {lastUpdated && (
-              <p className="text-gray-500 text-sm mt-1">
-                Обновлено: {lastUpdated.toLocaleTimeString("ru-RU")} ·{" "}
-                {news.length} статей из {RSS_SOURCES.length + 2} источников
-              </p>
-            )}
+            <p className="text-gray-500 text-sm mt-1">
+              {loading ? (
+                <span className="inline-flex items-center gap-1.5">
+                  <span className="w-3 h-3 border border-purple-500 border-t-transparent rounded-full animate-spin inline-block" />
+                  Загружаем источники... {sourcesLoaded}/{totalSources}
+                </span>
+              ) : lastUpdated ? (
+                `Обновлено: ${lastUpdated.toLocaleTimeString("ru-RU")} · ${allNews.length} статей из ${totalSources} источников`
+              ) : null}
+            </p>
           </div>
           <button
             type="button"
             onClick={refresh}
             disabled={loading}
-            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:border-white/30 transition-all text-sm"
-            data-ocid="news.refresh.button"
+            className="flex items-center gap-2 px-4 py-2 rounded-lg border border-white/10 text-gray-300 hover:text-white hover:border-white/30 transition-all text-sm disabled:opacity-50"
             title="Обновить новости"
           >
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
@@ -1451,12 +1622,14 @@ function NewsSection() {
           </button>
         </div>
 
-        <div className="flex flex-wrap gap-2 mb-8" data-ocid="news.filter.tab">
+        <div className="flex flex-wrap gap-2 mb-8">
           {categories.map((cat) => (
             <button
               key={cat}
               type="button"
-              onClick={() => setActiveCategory(cat)}
+              onClick={() => {
+                setActiveCategory(cat);
+              }}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all border ${
                 activeCategory === cat
                   ? "bg-purple-600 text-white border-purple-500"
@@ -1464,79 +1637,112 @@ function NewsSection() {
               }`}
             >
               {cat}
+              {cat !== "Все" && !loading && (
+                <span className="ml-1 opacity-40 text-[10px]">
+                  {allNews.filter((n) => n.category === cat).length || ""}
+                </span>
+              )}
             </button>
           ))}
         </div>
 
         {error && (
-          <div
-            className="mb-4 px-4 py-3 rounded-lg bg-yellow-900/20 border border-yellow-500/20 text-yellow-400 text-sm"
-            data-ocid="news.error_state"
-          >
+          <div className="mb-4 px-4 py-3 rounded-lg bg-yellow-900/20 border border-yellow-500/20 text-yellow-400 text-sm">
             {error}
           </div>
         )}
 
         {loading ? (
-          <div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-            data-ocid="news.loading_state"
-          >
-            {["s1", "s2", "s3", "s4", "s5", "s6"].map((id) => (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {Array.from({ length: 6 }, (_, i) => String(i)).map((id) => (
               <div
                 key={id}
                 className="rounded-xl border border-white/5 bg-white/3 h-52 animate-pulse"
               />
             ))}
           </div>
-        ) : filtered.length === 0 ? (
-          <div
-            className="text-center py-16 text-gray-500"
-            data-ocid="news.empty_state"
-          >
+        ) : visible.length === 0 ? (
+          <div className="text-center py-16 text-gray-500">
             Нет новостей по этой категории
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filtered.map((item, i) => (
-              <motion.div
-                key={item.link || String(i)}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: Math.min(i * 0.05, 0.3) }}
-                className="rounded-xl border border-white/5 bg-white/3 overflow-hidden hover:border-white/15 transition-all group"
-                data-ocid={`news.item.${i + 1}`}
-              >
-                <div
-                  className="h-1.5 w-full"
-                  style={{ background: item.gradient }}
-                />
-                <div className="p-5 flex flex-col gap-3 h-full">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-gray-300">
-                      {item.source}
-                    </span>
-                    <span className="text-xs text-gray-500">{item.date}</span>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {visible.map((item, i) => (
+                <motion.div
+                  key={
+                    item.link && item.link !== "#"
+                      ? item.link
+                      : `${item.source}-${i}`
+                  }
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: Math.min(i * 0.03, 0.3) }}
+                  className="rounded-xl border border-white/5 bg-white/3 overflow-hidden hover:border-white/15 transition-all group flex flex-col"
+                >
+                  <div
+                    className="h-1.5 w-full"
+                    style={{ background: item.gradient }}
+                  />
+                  <div className="p-5 flex flex-col gap-3 flex-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-white/10 text-gray-300 truncate max-w-[130px]">
+                        {item.source}
+                      </span>
+                      <span className="text-xs text-gray-500 shrink-0">
+                        {item.date}
+                      </span>
+                    </div>
+                    <h3 className="text-sm font-semibold text-white leading-snug group-hover:text-purple-300 transition-colors line-clamp-3">
+                      {item.title}
+                    </h3>
+                    <p className="text-xs text-gray-400 leading-relaxed line-clamp-3 flex-1">
+                      {item.excerpt}
+                    </p>
+                    <a
+                      href={item.link}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-purple-400 hover:text-purple-300 transition-colors mt-auto"
+                    >
+                      Читать →
+                    </a>
                   </div>
-                  <h3 className="text-sm font-semibold text-white leading-snug group-hover:text-purple-300 transition-colors line-clamp-3">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 leading-relaxed line-clamp-3 flex-1">
-                    {item.excerpt}
-                  </p>
-                  <a
-                    href={item.link}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-xs text-purple-400 hover:text-purple-300 transition-colors mt-auto"
-                    data-ocid={`news.read_more.link.${i + 1}`}
-                  >
-                    Читать →
-                  </a>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {hasMoreFiltered && (
+              <div className="flex justify-center mt-10">
+                <button
+                  type="button"
+                  onClick={loadMore}
+                  disabled={loadingMore}
+                  className="flex items-center gap-2 px-8 py-3 rounded-xl border border-purple-500/30 bg-purple-600/10 text-purple-300 hover:bg-purple-600/20 hover:border-purple-400/50 hover:text-white transition-all text-sm font-medium disabled:opacity-50"
+                >
+                  {loadingMore ? (
+                    <>
+                      <span className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin" />
+                      Загружаем...
+                    </>
+                  ) : (
+                    <>
+                      Загрузить ещё новости
+                      <span className="text-xs opacity-60 ml-1">
+                        +{Math.min(PAGE_SIZE, filtered.length - visibleCount)}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </div>
+            )}
+
+            {!hasMoreFiltered && visible.length >= PAGE_SIZE && (
+              <p className="text-center text-gray-600 text-xs mt-8">
+                Показано все {visible.length} статей
+              </p>
+            )}
+          </>
         )}
       </div>
     </section>
